@@ -7,7 +7,7 @@
       </div>
       <el-form :model="param" :rules="rules" ref="login" size="large">
         <el-form-item prop="username">
-          <el-input v-model="param.username" placeholder="用户名">
+          <el-input v-model="param.username" placeholder="Username">
             <template #prepend>
               <el-icon>
                 <User />
@@ -18,7 +18,7 @@
         <el-form-item prop="password">
           <el-input
             type="password"
-            placeholder="密码"
+            placeholder="Password"
             v-model="param.password"
             @keyup.enter="submitForm(login)"
           >
