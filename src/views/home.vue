@@ -8,25 +8,42 @@
                 <p class="subtitle">Effortless Industry Engagement Management for Industry Liaison Office</p>
             </div>
         </section>
-    
-        <button class="button is-primary">Just button</button>
 
-        <div class="columns">
-            <div class="column is-one-third">
-                <p class="box">Column 1</p>
-            </div>
-            <div class="column is-one-third">
-                <p class="box">Column 2</p>
-            </div>
-            <div class="column is-one-third">
-                <p class="box">Column 3</p>
-            </div>
+        <!--revoke main table-->
+        <div id="masterDB">
+            <h1>Master DataBase</h1>
+            <button @click="sendAllData">Send All Data</button>
+            <SubTable1 ref="subTable1" @sendData="receiveData"/>
+            <SubTable2 ref="subTable2" @sendData="receiveData"/>
+            <SubTable3 ref="subTable3" @sendData="receiveData"/>
+            <DataTable ref="mainTable"/>
         </div>
     </div>
 
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { ref } from 'vue';
+import DataTable from '@/components/DataTable.vue';
+import SubTable1 from '@/components/MTable.vue';
+import SubTable2 from '@/components/YiITable.vue';
+import SubTable3 from '@/components/PTable.vue';
+
+const subTable1 = ref();
+const subTable2 = ref();
+const subTable3 = ref();
+const mainTable = ref();
+
+const sendAllData = () => {
+  subTable1.value.sendData();
+  subTable2.value.sendData();
+  subTable3.value.sendData();
+};
+
+const receiveData = (data: any[]) => {
+  mainTable.value.receiveData(data);
+};
+</script>
 
 <style scoped>
     .title, .subtitle {

@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    DataTable: typeof import('./src/components/DataTable.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElConfigProvider: typeof import('element-plus/es')['ElConfigProvider']
@@ -16,7 +17,11 @@ declare module 'vue' {
     ElInput: typeof import('element-plus/es')['ElInput']
     ElLink: typeof import('element-plus/es')['ElLink']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
+    MentoringT: typeof import('./src/components/MentoringT.vue')['default']
+    MTable: typeof import('./src/components/MTable.vue')['default']
+    PTable: typeof import('./src/components/PTable.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    YiITable: typeof import('./src/components/YiITable.vue')['default']
   }
 }
