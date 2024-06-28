@@ -3,3 +3,5 @@
 <script setup lang="ts">
 // todo
 </script>
+
+<style scoped></style>

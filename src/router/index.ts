@@ -7,8 +7,96 @@ import { usePermissStore } from "../store/permiss";
 const routes: RouteRecordRaw[] = [
   {
     path: "/",
+    redirect: "/welcome",
+  },
+  {
+    path: "/",
     name: "Home",
     component: Home,
+    children: [
+      {
+        path: "/welcome",
+        name: "welcome",
+        meta: {
+          title: "Welcome",
+          noAuth: true,
+        },
+        component: () =>
+          import(/* webpackChunkName: "dashboard" */ "../views/welcome.vue"),
+      },
+      {
+        path: "/system-user",
+        name: "system-user",
+        meta: {
+          title: "User Management",
+          permiss: "system-user",
+        },
+        component: () =>
+          import(
+            /* webpackChunkName: "system-user" */ "../views/system/user.vue"
+          ),
+      },
+      {
+        path: "/system-role",
+        name: "system-role",
+        meta: {
+          title: "Role Management",
+          permiss: "system-role",
+        },
+        component: () =>
+          import(
+            /* webpackChunkName: "system-user" */ "../views/system/role.vue"
+          ),
+      },
+      {
+        path: "/database-management",
+        name: "database-management",
+        meta: {
+          title: "Master Database",
+          permiss: "database-management",
+        },
+        component: () =>
+          import(
+            /* webpackChunkName: "system-user" */ "../views/engagement/database.vue"
+          ),
+      },
+      {
+        path: "/mentor-management",
+        name: "mentor-management",
+        meta: {
+          title: "Mentoring",
+          permiss: "mentor-management",
+        },
+        component: () =>
+          import(
+            /* webpackChunkName: "system-user" */ "../views/engagement/mentor.vue"
+          ),
+      },
+      {
+        path: "/YiI-management",
+        name: "YiI-management",
+        meta: {
+          title: "YiI",
+          permiss: "YiI-management",
+        },
+        component: () =>
+          import(
+            /* webpackChunkName: "system-user" */ "../views/engagement/YiI.vue"
+          ),
+      },
+      {
+        path: "/projects-management",
+        name: "projects-management",
+        meta: {
+          title: "Projects",
+          permiss: "projects-management",
+        },
+        component: () =>
+          import(
+            /* webpackChunkName: "system-user" */ "../views/engagement/projects.vue"
+          ),
+      },
+    ],
   },
   {
     path: "/login",

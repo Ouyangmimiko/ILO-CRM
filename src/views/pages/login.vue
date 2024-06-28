@@ -7,7 +7,7 @@
       </div>
       <el-form :model="param" :rules="rules" ref="login" size="large">
         <el-form-item prop="username">
-          <el-input v-model="param.username" placeholder="用户名">
+          <el-input v-model="param.username" placeholder="User name">
             <template #prepend>
               <el-icon>
                 <User />
@@ -18,7 +18,7 @@
         <el-form-item prop="password">
           <el-input
             type="password"
-            placeholder="密码"
+            placeholder="Password"
             v-model="param.password"
             @keyup.enter="submitForm(login)"
           >
@@ -64,7 +64,7 @@
 import { ElMessage, FormInstance, FormRules } from "element-plus";
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import { usePermissStore } from "@/store/permiss";
+import { usePermissStore } from "../../store/permiss";
 
 interface LoginInfo {
   username: string;
@@ -112,7 +112,6 @@ const submitForm = (formEl: FormInstance | undefined) => {
       }
     } else {
       ElMessage.error("Login Failed");
-      return false;
     }
   });
 };

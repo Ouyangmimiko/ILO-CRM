@@ -7,8 +7,15 @@ interface ObjectList {
 export const usePermissStore = defineStore("permiss", {
   state: () => {
     const defaultList: ObjectList = {
-      admin: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-      user: ["0", "1", "2"],
+      admin: [
+        "system-user",
+        "system-role",
+        "database-management",
+        "mentor-management",
+        "YiI-management",
+        "projects-management",
+      ],
+      user: [],
     };
 
     const username = localStorage.getItem("ILO_user_name");
