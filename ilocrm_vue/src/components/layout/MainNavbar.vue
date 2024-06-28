@@ -10,7 +10,8 @@
     <div class="navbar-menu">
         <div class="navbar-end">
             <div class="navbar-item">
-                <div class="button">
+                <div class="buttons">
+                    <router-link to="/sign-up" class="button is-success">Sign up</router-link>
                     <router-link to="/log-in" class="button is-light">Log in</router-link>
                 </div>
             </div>
@@ -18,6 +19,4 @@
     </div>
 </template>
 
-<script setup>
-    
-</script>
+<script setup></script>
