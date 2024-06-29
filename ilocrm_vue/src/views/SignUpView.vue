@@ -26,7 +26,7 @@
                         </div>
                     </div>
 
-                    <!--show warning messages-->
+                    <!--show error messages-->
                     <div class="notification is-danger" v-if="errors.length">
                         <p v-for="error in errors" v-bind:key="error">{{ error }}</p>
                     </div>

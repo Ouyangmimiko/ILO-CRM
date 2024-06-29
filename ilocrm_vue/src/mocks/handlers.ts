@@ -24,19 +24,25 @@ export const handlers = [
     return HttpResponse.json(newPost, { status: 201 });
   }),
 
-  http.get('/api/log-in', () => {
-    return new HttpResponse(null, {
-        status: 200,
-        statusText: 'fake-token',//???
-    })
+  http.post('http://127.0.0.1:8000/api/token/login', async ({ request }: { request: Request }) => {
+    
+    const info = await request.json() as Post;
+    const username = info.username;
+    const password = info.password;
+    //console.log(`Username: ${username}, Password: ${password}`);
+
+    allPosts.set(info.id, info);
+
+    // mocking user authentificate
+    if (username === 'user@test.com' && password === 'password') {
+      return HttpResponse.json({ auth_token: 'mock-token' }, { status: 201 });
+      //new Response(JSON.stringify({ auth_token: 'mock-token' }), { status: 200 });
+    }
+
+    return HttpResponse.json({ error: 'password error' }, { status: 401 });
+    
+    //new Response(JSON.stringify({ error: 'Invalid credentials' }), { status: 401 });
+        
   }),
 
-  /*http.post('/api/login', (info) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
-        token: 'fake-token',
-      })
-    );
-  }),*/
 ];
