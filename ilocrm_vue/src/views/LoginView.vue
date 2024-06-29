@@ -4,11 +4,11 @@
             <div class="column is-4 is-offset-4">
                 <h1 class="title">Log in</h1>
 
-                <form>
+                <form @submit.prevent="submitForm">
                     <div class="field">
                         <label>Email</label>
                         <div class="control">
-                            <input type="email" name="email" class="input">
+                            <input type="email" name="email" class="input" placeholder="e.g. alex@smith.com">
                         </div>
                     </div>
 
@@ -32,5 +32,8 @@
 </template>
 
 <script setup>
+function submitForm() {
+  console.log('submitForm');
 
+}
 </script>
