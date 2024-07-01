@@ -12,3 +12,24 @@ http://ilodatabase.unaux.com/
 
 ## google drive
 https://drive.google.com/drive/folders/11tHrpfLI1AUKGmZiqL8i6qnZiW351JPJ?usp=drive_link
+
+## Branch explaination
+All files in **ilocrm_vue** folder:
+* In this folder & at terminal input: ***npm run serve***
+* In src folder:
+
+    * mocks folder is mocking back-end:
+
+        * use **handlers.ts** to set back-end api 
+    * router folder is all views router
+    * index.ts in store folder keeps state
+    * App.vue is whole website pages
+    * Basicly all global var in main.ts
+* In **components** folder (of src):
+
+    * layout folder includes: navbar, database-view-set
+    * table folder includes: base-table (for set tale), **combined-table** (recive table data from back-end & use base-table to create a table)
+    * ModifyBox.vue is just a example of add item to table (need change)
+  
+    
+If is there any question, please ask me
