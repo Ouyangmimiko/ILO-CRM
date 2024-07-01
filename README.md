@@ -14,6 +14,9 @@ http://ilodatabase.unaux.com/
 https://drive.google.com/drive/folders/11tHrpfLI1AUKGmZiqL8i6qnZiW351JPJ?usp=drive_link
 
 ## Branch explaination
+**Tutorial:** https://www.youtube.com/watch?v=u2RJXTtCn2Y (include front-end & back-end)
+分集版： https://www.youtube.com/watch?v=7rxHWX730nE （这是part1，然后点旁边一集一集看就好）
+
 All files in **ilocrm_vue** folder:
 * In this folder & at terminal input: ***npm run serve***
 * In src folder:
