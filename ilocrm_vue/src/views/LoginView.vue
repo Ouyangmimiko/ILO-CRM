@@ -55,7 +55,7 @@ function submitForm() {
     axios.defaults.headers.common['Authorization'] = ''
     localStorage.removeItem('token')
 
-    errors.value = [];//keep or not？
+    errors.value = [] //keep or not？
     
     const formData = {
         username: username.value,
@@ -85,6 +85,6 @@ function submitForm() {
         } else if (error.message) {
             errors.value.push('Somethig went wrong, please try again!')
         }
-    });
-    }
+    })
+}
 </script>

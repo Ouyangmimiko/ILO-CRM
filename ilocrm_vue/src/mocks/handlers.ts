@@ -45,4 +45,54 @@ export const handlers = [
         
   }),
 
+
+  //table
+  http.get('http://127.0.0.1:8000/api/data', () => {
+    return HttpResponse.json({
+      headers: [
+        'ORGANISATION',
+        'ORGANISATION SECTOR',
+        'FIRST NAME',
+        'SURNAME',
+        'JOB TITLE',
+        'EMAIL ADDRESS',
+        'LOCATION',
+        'UoB ALUMNI?',
+        'Programme of study engaged',
+        'Project client 2021',
+        'Project client 2022',
+        'Project client 2023'
+      ],
+      rows: [
+        { id: 1,
+          'ORGANISATION': 'Astrostructures Ltd',
+          'ORGANISATION SECTOR': '',
+          'FIRST NAME': '',
+          'SURNAME': '',
+          'JOB TITLE': '',
+          'EMAIL ADDRESS': '',
+          'LOCATION': 'Another international city',
+          'UoB ALUMNI?': 'Yes',
+          'Programme of study engaged': 'MECH',
+          'Project client 2021': '',
+          'Project client 2022': '',
+          'Project client 2023': ''
+        },
+        { id: 2,
+          'ORGANISATION': 'Frazer-Nash Consultancy',
+          'ORGANISATION SECTOR': '',
+          'FIRST NAME': '',
+          'SURNAME': '',
+          'JOB TITLE': '',
+          'EMAIL ADDRESS': '',
+          'LOCATION': 'Bristol and surrounding area',
+          'UoB ALUMNI?': 'Yes',
+          'Programme of study engaged': 'EMAT',
+          'Project client 2021': '',
+          'Project client 2022': '',
+          'Project client 2023': ''
+        }
+      ]
+    });
+  }),
 ];

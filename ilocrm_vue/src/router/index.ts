@@ -1,18 +1,29 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import store from '@/store'
 
+import AboutView from '../views/AboutView.vue'
 import HomeView from '../views/HomeView.vue'
 
 import SignUpView from '../views/SignUpView.vue'
 import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/dashboard/DashboardView.vue'
 import MyAccountView from '../views/dashboard/MyAccountView.vue'
+import MasterDBView from '@/views/database/MasterDBView.vue'
+import MentoringView from '@/views/database/MentoringView.vue'
+import YiIView from '@/views/database/YiIView.vue'
+import ProjectsView from '@/views/database/ProjectsView.vue'
+import ModifyView from '@/views/management/ModifyView.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'home',
     component: HomeView
+  },
+  {
+    path: '/about',
+    name: 'about',
+    component: AboutView
   },
   {
     path: '/sign-up',
@@ -36,6 +47,46 @@ const routes: Array<RouteRecordRaw> = [
     path: '/dashboard/my-account',
     name: 'MyAccount',
     component: MyAccountView,
+    meta: {
+      requireLogin: true
+    }
+  },
+  {
+    path: '/master-database',
+    name: 'MasterDB',
+    component: MasterDBView,
+    meta: {
+      requireLogin: true
+    }
+  },
+  {
+    path: '/mentoring',
+    name: 'Mentoring',
+    component: MentoringView,
+    meta: {
+      requireLogin: true
+    }
+  },
+  {
+    path: '/year-in-industry',
+    name: 'YiI',
+    component: YiIView,
+    meta: {
+      requireLogin: true
+    }
+  },
+  {
+    path: '/projects',
+    name: 'Projects',
+    component: ProjectsView,
+    meta: {
+      requireLogin: true
+    }
+  },
+  {
+    path: '/modify',
+    name: 'Modify',
+    component: ModifyView,
     meta: {
       requireLogin: true
     }

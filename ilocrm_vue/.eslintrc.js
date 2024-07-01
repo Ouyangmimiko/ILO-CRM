@@ -12,8 +12,12 @@ module.exports = {
     ecmaVersion: 2020
   },
   rules: {
+    'no-undef': 'off', // Disable the no-undef rule for defineProps
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
+  },
+  globals: {
+    defineProps: 'readonly', // Declare defineProps as a global variable
   },
   overrides: [
     {
