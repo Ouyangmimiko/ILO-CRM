@@ -7,7 +7,7 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-Cross domain connection
+Cross-Origin Resource Sharing for cross origin request between frontend and backend
     CORS
     config/cors.php
 
