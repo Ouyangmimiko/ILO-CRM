@@ -61,9 +61,6 @@ jobs:
 #    - name: Copy frontend build to backend
 #      run: cp -r ./frontend/dist/* ./backend/public
 
-    - name: Generate application key
-      run: php artisan key:generate
-      working-directory: ./backend
 
     - name: Create .env file
       run: cp .env.example .env
@@ -75,6 +72,10 @@ jobs:
         sed -i 's/DB_DATABASE=homestead/DB_DATABASE=test/' .env   # need to set the mysql detail in practical use
         sed -i 's/DB_USERNAME=homestead/DB_USERNAME=root/' .env  
         sed -i 's/DB_PASSWORD=secret/DB_PASSWORD=root/' .env
+      working-directory: ./backend
+
+    - name: Generate application key
+      run: php artisan key:generate
       working-directory: ./backend
 
     - name: Run database migrations
