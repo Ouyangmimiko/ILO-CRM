@@ -44,9 +44,9 @@ jobs:
 #      working-directory: ./frontend
 #      run: npm test
 
-    - name: Build frontend
-      working-directory: ./frontend
-      run: npm run build --if-present
+#    - name: Build frontend
+#      working-directory: ./frontend
+#      run: npm run build --if-present
 
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
