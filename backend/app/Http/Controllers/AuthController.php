@@ -6,24 +6,96 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    public function login(Request $request) {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
-        $credentials = $request->only('email', 'password');
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            $token = $user->creatToken('LoginToken')->plainTextToken;
+    // For admin add new user
+    public function register(Request $request) {
+        try {
+            $validator = Validator::make($request->all(),
+                [
+                    'name' => 'required',
+                    'email' => 'required|email|unique:users',
+                    'password' => 'required',
+                ]);
 
-            return response()->json(['user' => $user, 'token' => $token], 200);
+            // Error message
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Register Failed',
+                    'errors' => $validator->errors()
+                ],401);
+            }
+
+            // add new user if information correct
+            $user = User::create([
+                'name' => $request->get('name'),
+                'email' => $request->get('email'),
+                'password' => $request->get('password'),
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'User created successfully',
+                // Not sure the token will be used after register
+                //'token' => $user->createToken('auth_token')->plainTextToken,
+            ],200);
+
+        } catch (\Throwable $exception) {
+            // return 500
+            return response()->json([
+                'status' => false,
+                'message' => $exception->getMessage(),
+            ],500);
         }
+    }
 
-        return response()->json(['error' => 'Unauthorized',],401);
+    // login method
+    public function login(Request $request) {
+        try {
+            $validator = Validator::make($request->all(),
+                [
+                'email' => 'required|email',
+                'password' => 'required',
+                ]);
+
+            // Lake of required texts
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Login Failed',
+                    'errors' => $validator->errors()
+                ],401);
+            }
+
+            if (!Auth::attempt($request->only('email', 'password'))) {
+                // Texts not match the users table
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Login Failed: email or password not found',
+                ],401);
+            }
+
+            // Creat and respond user object and token
+            $user = User::where('email', $request->get('email'))->first();
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Login successfully',
+                'user' => $user,
+                'token' => $token,
+            ],200);
+
+        } catch (\Throwable $exception) {
+            return response()->json([
+                'status' => false,
+                'message' => $exception->getMessage()
+            ],500);
+        }
     }
 
     public function logout(Request $request) {
