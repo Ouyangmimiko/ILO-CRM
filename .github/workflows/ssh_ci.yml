@@ -58,8 +58,8 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-suggest
       working-directory: ./backend
 
-    - name: Copy frontend build to backend
-      run: cp -r ./frontend/dist/* ./backend/public
+#    - name: Copy frontend build to backend
+#      run: cp -r ./frontend/dist/* ./backend/public
 
     - name: Generate application key
       run: php artisan key:generate
