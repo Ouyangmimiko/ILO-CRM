@@ -86,16 +86,16 @@ jobs:
 #      run: php artisan test
 #      working-directory: ./backend
 
-    - name: Deploy to Serve
-      env:
-        SSH_HOST: ${{ secrets.SSH_HOST }}
-        SSH_USER: ${{ secrets.SSH_USER }}
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SSH_PORT: ${{ secrets.SSH_PORT }}
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-        rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" --exclude='.git' --exclude='node_modules' --exclude='vendor' ./backend/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/path/to/deploy/backend/
-        ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /path/to/deploy/backend && composer install && php artisan migrate --force && php artisan cache:clear && php artisan config:clear && php artisan route:clear && php artisan view:clear"
+#    - name: Deploy to Serve
+#      env:
+#        SSH_HOST: ${{ secrets.SSH_HOST }}
+#        SSH_USER: ${{ secrets.SSH_USER }}
+#        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+#        SSH_PORT: ${{ secrets.SSH_PORT }}
+#      run: |
+#        mkdir -p ~/.ssh
+#        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+#        chmod 600 ~/.ssh/id_rsa
+#        ssh-keyscan -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+#        rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" --exclude='.git' --exclude='node_modules' --exclude='vendor' ./backend/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/path/to/deploy/backend/
+#        ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /path/to/deploy/backend && composer install && php artisan migrate --force && php artisan cache:clear && php artisan config:clear && php artisan route:clear && php artisan view:clear"
