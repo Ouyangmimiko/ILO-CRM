@@ -6,7 +6,13 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
-    
+
+Cross-Origin Resource Sharing for cross origin request between frontend and backend
+    CORS
+    config/cors.php
+
+        'allowed_origins' => ['*'], // could be ['http://localhost:5173'] to keep safe
+
     Path of controller
     app/
     ├── Http/
