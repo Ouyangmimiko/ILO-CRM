@@ -1,0 +1,99 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm install
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 'latest'  # to use latest  PHP
+        extensions: mbstring, pdo, pdo_mysql
+
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
+      working-directory: ./backend
+
+    - name: Create .env file
+      run: cp .env.example .env
+      working-directory: ./backend
+
+    - name: Update .env file
+      run: |
+        sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
+        sed -i 's/DB_DATABASE=laravel/DB_DATABASE=test/' .env  
+        sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env  
+        sed -i 's/DB_PASSWORD=/DB_PASSWORD=/' .env
+      working-directory: ./backend
+
+#    - name: Build frontend
+#      working-directory: ./frontend
+#      run: npm run build
+
+    # Set up SSH for connecting to EC2
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.AWS_EC2_KEY }}
+
+    # Copy front-end build files to EC2
+#    - name: Copy front-end build files to EC2
+#      run: scp -r -o StrictHostKeyChecking=no ./frontend/dist/* ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }}:/home/ubuntu/web-project/frontend
+
+    # Copy back-end files to EC2
+    - name: Copy back-end files to EC2
+      run: | 
+        rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./backend/ ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }}:/home/ubuntu/web-project/backend/
+      
+
+    # Deploy Laravel Application on EC2
+    - name: Deploy Laravel Application on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+          # Navigate to the project directory
+          cd /home/ubuntu/web-project/backend
+
+          # Install Composer dependencies
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+
+          # Generate application key
+          php artisan key:generate
+
+          # Run database migrations and seeders
+          php artisan migrate --force
+          php artisan db:seed --force
+
+          # Clear and cache configuration, routes, and views
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+          cd /home/ubuntu/web-project
+          
+          # Set appropriate permissions
+          sudo chown -R ubuntu:ubuntu /home/ubuntu/web-project
+          sudo chmod -R 775 /home/ubuntu/web-project/storage
+          sudo chmod -R 775 /home/ubuntu/web-project/bootstrap/cache
+
+          # Restart services
+          sudo systemctl restart nginx
+          sudo systemctl restart php8.3-fpm
+        EOF
