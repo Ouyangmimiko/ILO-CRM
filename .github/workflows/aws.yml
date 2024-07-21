@@ -28,21 +28,21 @@ jobs:
         php-version: 'latest'  # to use latest  PHP
         extensions: mbstring, pdo, pdo_mysql
 
-    - name: Install Composer dependencies
-      run: composer install --prefer-dist --no-progress --no-suggest
-      working-directory: ./backend
+#    - name: Install Composer dependencies
+#      run: composer install --prefer-dist --no-progress --no-suggest
+#      working-directory: ./backend
 
     - name: Create .env file
       run: cp .env.example .env
       working-directory: ./backend
 
-    - name: Update .env file
-      run: |
-        sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
-        sed -i 's/DB_DATABASE=laravel/DB_DATABASE=test/' .env  
-        sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env  
-        sed -i 's/DB_PASSWORD=/DB_PASSWORD=/' .env
-      working-directory: ./backend
+#    - name: Update .env file
+#      run: |
+#        sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
+#        sed -i 's/DB_DATABASE=laravel/DB_DATABASE=test/' .env  
+#        sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env  
+#        sed -i 's/DB_PASSWORD=/DB_PASSWORD=/' .env
+#      working-directory: ./backend
 
 #    - name: Build frontend
 #      working-directory: ./frontend
@@ -53,6 +53,10 @@ jobs:
       uses: webfactory/ssh-agent@v0.5.3
       with:
         ssh-private-key: ${{ secrets.AWS_EC2_KEY }}
+
+    - name: Change permissions before rsync
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }} "sudo chown -R ubuntu:ubuntu /home/ubuntu/web-project/backend && sudo chmod -R 755 /home/ubuntu/web-project/backend"
 
     # Copy front-end build files to EC2
 #    - name: Copy front-end build files to EC2
@@ -72,7 +76,17 @@ jobs:
           cd /home/ubuntu/web-project/backend
 
           # Install Composer dependencies
-          composer install --no-interaction --prefer-dist --optimize-autoloader
+          composer install --optimize-autoloader --no-dev
+
+          # Creat and update .env
+          cp .env.example .env
+          sed -i 's/APP_ENV=.*/APP_ENV=production/' .env
+          sed -i 's/APP_DEBUG=.*/APP_DEBUG=false/' .env
+          sed -i 's/APP_URL=.*/APP_URL=http:\/\/13.43.95.151/' .env # Update server name
+          sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_DATABASE=laravel/DB_DATABASE=test/' .env  
+          sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env  
+          sed -i 's/DB_PASSWORD=/DB_PASSWORD=/' .env
 
           # Generate application key
           php artisan key:generate
@@ -83,15 +97,19 @@ jobs:
 
           # Clear and cache configuration, routes, and views
           php artisan config:cache
+          php artisan config:clear
+          php artisan cache:clear
           php artisan route:cache
           php artisan view:cache
 
           cd /home/ubuntu/web-project
           
           # Set appropriate permissions
-          sudo chown -R ubuntu:ubuntu /home/ubuntu/web-project
-          sudo chmod -R 775 /home/ubuntu/web-project/storage
-          sudo chmod -R 775 /home/ubuntu/web-project/bootstrap/cache
+          sudo chown -R www-data:www-data /home/ubuntu/web-project/backend
+          sudo chown -R www-data:www-data /home/ubuntu/web-project/backend/storage
+          sudo chown -R www-data:www-data /home/ubuntu/web-project/backend/bootstrap/cache
+          sudo chmod -R 775 /home/ubuntu/web-project/backend/storage
+          sudo chmod -R 775 /home/ubuntu/web-project/backend/bootstrap/cache
 
           # Restart services
           sudo systemctl restart nginx
