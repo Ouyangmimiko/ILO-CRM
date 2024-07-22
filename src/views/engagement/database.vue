@@ -1,17 +1,65 @@
 <template>
   <div class="container">
     <!-- form -->
-    <el-form :model="queryForm" inline class="query-form">
-      <el-form-item label="Name">
-        <el-input v-model="queryForm.name" placeholder="Please enter name" />
-      </el-form-item>
-      <el-form-item label="Address">
+
+    <el-form :model="queryForm" inline class="query-form styled-form">
+      <el-form-item label="ORGANISATION">
         <el-input
-          v-model="queryForm.address"
+          v-model="queryForm.ORGANISATION"
+          placeholder="Please enter name"
+        />
+      </el-form-item>
+      <el-form-item label="ORGANISATION SECTOR">
+        <el-input
+          v-model="queryForm['ORGANISATION SECTOR']"
           placeholder="Please enter address"
         />
       </el-form-item>
-      <el-form-item>
+      <el-form-item label="FIRST NAME">
+        <el-input
+          v-model="queryForm['FIRST NAME']"
+          placeholder="Please enter name"
+        />
+      </el-form-item>
+      <el-form-item label="SURNAME">
+        <el-input
+          v-model="queryForm['SURNAME']"
+          placeholder="Please enter name"
+        />
+      </el-form-item>
+      <el-form-item label="JOB TITLE">
+        <el-input
+          v-model="queryForm['JOB TITLE']"
+          placeholder="Please enter name"
+        />
+      </el-form-item>
+
+      <el-form-item label="EMAIL ADDRESS">
+        <el-input
+          v-model="queryForm['EMAIL ADDRESS']"
+          placeholder="Please enter name"
+        />
+      </el-form-item>
+      <el-form-item label="LOCATION">
+        <el-input
+          v-model="queryForm['LOCATION']"
+          placeholder="Please enter name"
+        />
+      </el-form-item>
+      <el-form-item label="UoB ALUMNI">
+        <el-input
+          v-model="queryForm['UoB ALUMNI']"
+          placeholder="Please enter name"
+        />
+      </el-form-item>
+      <el-form-item label="Programme of study engaged">
+        <el-input
+          v-model="queryForm['Programme of study engaged']"
+          placeholder="Please enter name"
+        />
+      </el-form-item>
+
+      <el-form-item class="form-actions">
         <el-button type="primary" @click="handleQuery">Query</el-button>
         <el-button @click="handleReset">Reset</el-button>
       </el-form-item>
@@ -35,13 +83,29 @@
       max-height="500"
       table-layout="fixed"
     >
-      <el-table-column fixed prop="date" label="Date" width="150" />
-      <el-table-column prop="name" label="Name" width="120" />
-      <el-table-column prop="state" label="State" width="120" />
-      <el-table-column prop="city" label="City" width="120" />
-      <el-table-column prop="address" label="Address" width="600" />
-      <el-table-column prop="zip" label="Zip" width="120" />
-      <el-table-column fixed="right" label="Operations" min-width="120">
+      <el-table-column
+        fixed
+        prop="ORGANISATION"
+        label="ORGANISATION"
+        width="150"
+      />
+      <el-table-column
+        prop="ORGANISATION SECTOR"
+        label="ORGANISATION SECTOR"
+        width="120"
+      />
+      <el-table-column prop="FIRST NAME" label="FIRST NAME" width="120" />
+      <el-table-column prop="SURNAME" label="SURNAME" width="120" />
+      <el-table-column prop="JOB TITLE" label="JOB TITLE" width="120" />
+      <el-table-column prop="EMAIL ADDRESS" label="EMAIL ADDRESS" width="120" />
+      <el-table-column prop="LOCATION" label="LOCATION" width="120" />
+      <el-table-column prop="LOCATION" label="LOCATION" width="120" />
+      <el-table-column
+        prop="Programme of study engaged"
+        label="Programme of study engaged"
+        width="300"
+      />
+      <el-table-column fixed="right" label="Operations" min-width="150">
         <template #default="scope">
           <el-button size="small" @click="handleEdit(scope.$index, scope.row)">
             Edit
@@ -77,23 +141,32 @@
       :before-close="handleClose"
     >
       <el-form :model="editForm">
-        <el-form-item label="Date">
-          <el-input v-model="editForm.date" />
+        <el-form-item label="ORGANISATION">
+          <el-input v-model="editForm.ORGANISATION" />
         </el-form-item>
-        <el-form-item label="Name">
-          <el-input v-model="editForm.name" />
+        <el-form-item label="ORGANISATION SECTOR">
+          <el-input v-model="editForm['ORGANISATION SECTOR']" />
         </el-form-item>
-        <el-form-item label="State">
-          <el-input v-model="editForm.state" />
+        <el-form-item label="FIRST NAME">
+          <el-input v-model="editForm['FIRST NAME']" />
         </el-form-item>
-        <el-form-item label="City">
-          <el-input v-model="editForm.city" />
+        <el-form-item label="SURNAME">
+          <el-input v-model="editForm.SURNAME" />
         </el-form-item>
-        <el-form-item label="Address">
-          <el-input v-model="editForm.address" />
+        <el-form-item label="JOB TITLE">
+          <el-input v-model="editForm['JOB TITLE']" />
         </el-form-item>
-        <el-form-item label="Zip">
-          <el-input v-model="editForm.zip" />
+        <el-form-item label="EMAIL ADDRESS">
+          <el-input v-model="editForm['EMAIL ADDRESS']" />
+        </el-form-item>
+        <el-form-item label="LOCATION">
+          <el-input v-model="editForm['LOCATION']" />
+        </el-form-item>
+        <el-form-item label="UoB ALUMNI">
+          <el-input v-model="editForm['UoB ALUMNI']" />
+        </el-form-item>
+        <el-form-item label="Programme of study engaged">
+          <el-input v-model="editForm['Programme of study engaged']" />
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -121,18 +194,27 @@ import {
 } from "element-plus";
 
 interface ITableData {
-  date: string;
-  name: string;
-  state: string;
-  city: string;
-  address: string;
-  zip: string;
-  tag: string;
+  ORGANISATION: string;
+  "ORGANISATION SECTOR": string;
+  "FIRST NAME": string;
+  SURNAME: string;
+  "JOB TITLE": string;
+  "EMAIL ADDRESS": string;
+  LOCATION: string;
+  "UoB ALUMNI": boolean;
+  "Programme of study engaged": string;
 }
 
-const queryForm = ref({
-  name: "",
-  address: "",
+const queryForm = reactive<ITableData>({
+  ORGANISATION: "",
+  "ORGANISATION SECTOR": "",
+  "FIRST NAME": "",
+  SURNAME: "",
+  "JOB TITLE": "",
+  "EMAIL ADDRESS": "",
+  LOCATION: "",
+  "UoB ALUMNI": false,
+  "Programme of study engaged": "",
 });
 
 const handleQuery = () => {
@@ -141,8 +223,15 @@ const handleQuery = () => {
 };
 
 const handleReset = () => {
-  queryForm.value.name = "";
-  queryForm.value.address = "";
+  queryForm.ORGANISATION = "";
+  queryForm["ORGANISATION SECTOR"] = "";
+  queryForm["FIRST NAME"] = "";
+  queryForm.SURNAME = "";
+  queryForm["JOB TITLE"] = "";
+  queryForm["EMAIL ADDRESS"] = "";
+  queryForm.LOCATION = "";
+  queryForm["UoB ALUMNI"] = false;
+  queryForm["Programme of study engaged"] = "";
   handleQuery();
 };
 
@@ -163,40 +252,48 @@ const exportExcel = () => {
 
 const tableData = ref([
   {
-    date: "2016-05-03",
-    name: "Tom",
-    state: "California",
-    city: "Los Angeles",
-    address: "No. 189, Grove St, Los Angeles",
-    zip: "CA 90036",
-    tag: "Home",
+    ORGANISATION: "Actisense – Active Research Limited",
+    "ORGANISATION SECTOR": "ICT",
+    "FIRST NAME": "test",
+    SURNAME: "test",
+    "JOB TITLE": "test",
+    "EMAIL ADDRESS": "test",
+    LOCATION: "test",
+    "UoB ALUMNI": false,
+    "Programme of study engaged": "test",
   },
   {
-    date: "2016-05-02",
-    name: "Tom",
-    state: "California",
-    city: "Los Angeles",
-    address: "No. 189, Grove St, Los Angeles",
-    zip: "CA 90036",
-    tag: "Office",
+    ORGANISATION: "Actisense – Active Research Limited",
+    "ORGANISATION SECTOR": "ICT",
+    "FIRST NAME": "test",
+    SURNAME: "test",
+    "JOB TITLE": "test",
+    "EMAIL ADDRESS": "test",
+    LOCATION: "test",
+    "UoB ALUMNI": false,
+    "Programme of study engaged": "test",
   },
   {
-    date: "2016-05-04",
-    name: "Tom",
-    state: "California",
-    city: "Los Angeles",
-    address: "No. 189, Grove St, Los Angeles",
-    zip: "CA 90036",
-    tag: "Home",
+    ORGANISATION: "Actisense – Active Research Limited",
+    "ORGANISATION SECTOR": "ICT",
+    "FIRST NAME": "test",
+    SURNAME: "test",
+    "JOB TITLE": "test",
+    "EMAIL ADDRESS": "test",
+    LOCATION: "test",
+    "UoB ALUMNI": false,
+    "Programme of study engaged": "test",
   },
   {
-    date: "2016-05-01",
-    name: "Tom",
-    state: "California",
-    city: "Los Angeles",
-    address: "No. 189, Grove St, Los Angeles",
-    zip: "CA 90036",
-    tag: "Office",
+    ORGANISATION: "Actisense – Active Research Limited",
+    "ORGANISATION SECTOR": "ICT",
+    "FIRST NAME": "test",
+    SURNAME: "test",
+    "JOB TITLE": "test",
+    "EMAIL ADDRESS": "test",
+    LOCATION: "test",
+    "UoB ALUMNI": false,
+    "Programme of study engaged": "test",
   },
 ]);
 
@@ -205,13 +302,15 @@ const pageSize = ref(5);
 const total = ref(tableData.value.length);
 const dialogVisible = ref(false);
 const editForm = reactive<ITableData>({
-  date: "",
-  name: "",
-  state: "",
-  city: "",
-  address: "",
-  zip: "",
-  tag: "",
+  ORGANISATION: "",
+  "ORGANISATION SECTOR": "",
+  "FIRST NAME": "",
+  SURNAME: "",
+  "JOB TITLE": "",
+  "EMAIL ADDRESS": "",
+  LOCATION: "",
+  "UoB ALUMNI": false,
+  "Programme of study engaged": "",
 });
 let isEdit = ref(false);
 
@@ -224,12 +323,15 @@ const pagedData = computed(() => {
 
 const handleAdd = () => {
   isEdit.value = false;
-  editForm.date = "";
-  editForm.name = "";
-  editForm.state = "";
-  editForm.city = "";
-  editForm.address = "";
-  editForm.zip = "";
+  editForm.ORGANISATION = "";
+  editForm["ORGANISATION SECTOR"] = "";
+  editForm["FIRST NAME"] = "";
+  editForm.SURNAME = "";
+  editForm["JOB TITLE"] = "";
+  editForm["EMAIL ADDRESS"] = "";
+  editForm.LOCATION = "";
+  editForm["UoB ALUMNI"] = false;
+  editForm["Programme of study engaged"] = "";
   dialogVisible.value = true;
 };
 
@@ -269,6 +371,35 @@ const handleClose = (done: () => void) => {
 
 .query-form {
   margin-bottom: 20px;
+}
+
+.styled-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Adjusted gap to fit more compactly */
+}
+
+.styled-form .el-form-item {
+  flex: 1 1 calc(25% - 10px); /* Adjusted width for compact layout */
+  display: flex;
+  align-items: center; /* Aligns label and input vertically centered */
+}
+
+.styled-form .el-form-item .el-form-item__label {
+  text-align: right; /* Right-aligns the label */
+  width: 150px; /* Adjust width as needed */
+  margin-right: 10px; /* Space between label and input */
+}
+
+.styled-form .el-form-item .el-form-item__content {
+  flex: 1;
+}
+
+.form-actions {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .function-buttons {
