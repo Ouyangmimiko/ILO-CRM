@@ -52,6 +52,7 @@ const tabs = useTabsStore();
   padding: 20px;
   overflow-y: scroll;
   box-sizing: border-box;
+  background-color: white;
 }
 .content::-webkit-scrollbar {
   width: 0;
