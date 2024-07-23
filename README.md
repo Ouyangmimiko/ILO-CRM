@@ -12,3 +12,6 @@ http://ilodatabase.unaux.com/
 
 ## google drive
 https://drive.google.com/drive/folders/11tHrpfLI1AUKGmZiqL8i6qnZiW351JPJ?usp=drive_link
+
+## use of AWS EC2 
+https://docs.google.com/document/d/15-jI7dai9uKKGYXAAgmA7VMU3JsqqG_agOWGdYhlDJQ/edit?usp=sharing
