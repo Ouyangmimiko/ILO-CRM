@@ -10,6 +10,6 @@ const instance = axios.create({
     },
 });
 
-axios.isAxiosError = isAxiosError;
+// axios.isAxiosError = isAxiosError;
 
 export default instance;

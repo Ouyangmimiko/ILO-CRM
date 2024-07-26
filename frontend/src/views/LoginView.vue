@@ -56,7 +56,7 @@ function submitForm() {
     localStorage.removeItem('token')
 
     errors.value = [] //keep or not？
-    
+
     const formData = {
         username: username.value,
         password: password.value
