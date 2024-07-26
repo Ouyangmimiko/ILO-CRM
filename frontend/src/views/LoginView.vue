@@ -63,7 +63,7 @@ function submitForm() {
     }
 
     axios
-    .post('/api/token/login', formData)
+    .post('@/backend/api', formData)
     .then(response => {
         // get auth_token from response
         const token = response.data.auth_token;
@@ -79,12 +79,13 @@ function submitForm() {
         router.push('/dashboard/my-account');
     })
     .catch(error => {
-        if (error.response) {
-            console.log(error.response.data)
-            errors.value.push('password error')
-        } else if (error.message) {
-            errors.value.push('Somethig went wrong, please try again!')
-        }
+        // if (error.response) {
+        //     console.log(error.response.data)
+        //     errors.value.push('password error')
+        // } else if (error.message) {
+        //     errors.value.push('Somethig went wrong, please try again!')
+        // }
+      errors.value = error.message;
     })
 }
 </script>

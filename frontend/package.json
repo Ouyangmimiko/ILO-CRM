@@ -49,5 +49,13 @@
     "workerDirectory": [
       "public"
     ]
-  }
+  },
+  "description": "```\r yarn install\r ```",
+  "main": ".eslintrc.js",
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
