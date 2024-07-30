@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'], // ['GET', 'POST', 'UPDATE', ...]
 
-    'allowed_origins' => ['http://localhost:5173'], // ['http://localhost:5173'] for frontend server
+    'allowed_origins' => ['*'], // ['http://localhost:5173'] for frontend server
 
     'allowed_origins_patterns' => [],
 

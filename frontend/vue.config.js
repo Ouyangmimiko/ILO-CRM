@@ -1,11 +1,22 @@
 // vue.config.js
-module.exports = {
+const { defineConfig } = require('@vue/cli-service')
+console.log('vue.config.js is loaded');
+module.exports = defineConfig({
+    configureWebpack: {
+        resolve: {
+            alias: {
+                '@': require('path').join(__dirname, 'src'),
+            },
+        },
+    },
     devServer: {
+        compress: false,
         proxy: {
-            '/backend': {
-              target: 'http://127.0.0.1:8000', //   Laravel API location
+            '/api/*': {
+              target: 'http://localhost:8000', //   Laravel API location
               changeOrigin: true,
+                logLevel: 'debug',
             },
         } ,
     },
-}
+})

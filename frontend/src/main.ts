@@ -7,9 +7,9 @@ import axios from 'axios'
 import { worker } from './mocks/browser';// configure for mocking back-end
 
 // Start the mock service worker
-worker.start();
+// worker.start();
 
-axios.defaults.baseURL = 'http://127.0.0.1:8000'
+// axios.defaults.baseURL = 'http://127.0.0.1:8000'
 
 const app = createApp(App);
 app.use(store);
