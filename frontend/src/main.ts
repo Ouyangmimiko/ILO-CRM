@@ -1,21 +1,22 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import './registerServiceWorker'
-import router from './router'
-import store from './store'
-import axios from 'axios'
-import { worker } from './mocks/browser';// configure for mocking back-end
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 
-// Start the mock service worker
-// worker.start();
+import App from "./App.vue";
+import "element-plus/dist/index.css";
+import "./assets/css/icon.css";
 
-// axios.defaults.baseURL = 'http://127.0.0.1:8000'
+import router from "./router";
+
+const pinia = createPinia();
 
 const app = createApp(App);
-app.use(store);
+app.use(pinia);
 app.use(router);
-// 将 axios 添加到 Vue 实例的全局属性中
-app.config.globalProperties.$axios = axios;
 
-// 挂载 Vue 应用程序到 HTML 元素上
-app.mount('#app');
+// register elementplus icons
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component);
+}
+
+app.mount("#app");
