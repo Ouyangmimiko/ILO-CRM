@@ -45,11 +45,12 @@ jobs:
 
     - name: Change permissions before rsync
       run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }} "sudo chown -R ubuntu:ubuntu /home/ubuntu/web-project/frontend && sudo chmod -R 755 /home/ubuntu/web-project/frontend"
         ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }} "sudo chown -R ubuntu:ubuntu /home/ubuntu/web-project/backend && sudo chmod -R 755 /home/ubuntu/web-project/backend"
 
     # Copy front-end build files to EC2
     - name: Copy front-end build files to EC2
-      run: scp -r -o StrictHostKeyChecking=no ./frontend/dist/* ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }}:/home/ubuntu/web-project/frontend
+      run: rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./frontend/dist/* ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }}:/home/ubuntu/web-project/frontend/
 
     # Copy back-end files to EC2
     - name: Copy back-end files to EC2
@@ -99,6 +100,8 @@ jobs:
           sudo chown -R www-data:www-data /home/ubuntu/web-project/backend/bootstrap/cache
           sudo chmod -R 775 /home/ubuntu/web-project/backend/storage
           sudo chmod -R 775 /home/ubuntu/web-project/backend/bootstrap/cache
+          sudo chown -R www-data:www-data /home/ubuntu/web-project/frontend
+          sudo chown -R www-data:www-data /home/ubuntu/web-project/frontend/dist
 
           # Restart services
           sudo systemctl restart nginx
