@@ -105,7 +105,7 @@ const closeTabs = (path: string) => {
 
 watch(
   () => route.fullPath,
-  (newVal, oldVal) => {
+  (newVal, _oldVal) => {
     activePath.value = newVal;
   }
 );
