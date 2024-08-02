@@ -16,7 +16,7 @@ class AuthController extends Controller
         try {
             $validator = Validator::make($request->all(),
                 [
-                    'name' => 'required',
+                    'name' => 'required|unique:users|max:255',
                     'email' => 'required|email|unique:users',
                     'password' => 'required',
                 ]);
@@ -36,6 +36,7 @@ class AuthController extends Controller
                 'email' => $request->get('email'),
                 'password' => $request->get('password'),
             ]);
+            $role = $user->userRoles()->create();
 
             return response()->json([
                 'status' => true,
@@ -79,15 +80,16 @@ class AuthController extends Controller
                 ],401);
             }
 
-            // Creat and respond user object and token
+            // Creat and respond user object and token (have set expiring time)
             $user = User::where('email', $request->get('email'))->first();
-            $token = $user->createToken('auth_token')->plainTextToken;
+            $token = $user->createToken('auth_token',['*'],now()->addMinutes(120))->plainTextToken;
 
             return response()->json([
                 'status' => true,
                 'message' => 'Login successfully',
                 'user' => $user,
                 'token' => $token,
+                'is_admin' => $user->isAdmin(),
             ],200);
 
         } catch (\Throwable $exception) {
@@ -99,7 +101,15 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request) {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user(); // 获取当前用户
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        // Proceed with token deletion
+        $user->currentAccessToken()->delete();
+
         return response()->json(['message' => 'Successfully logged out']);
     }
 }
