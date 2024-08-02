@@ -108,14 +108,14 @@ const submitForm = async (formEl: FormInstance | undefined) => {
           ElMessage.success(response.data.message);
           localStorage.setItem("ILO_user_name", param.email);
 
-          // 假设服务器返回了用户对象和 token
-          const { user, token } = response.data;
-
+          const { user, token, is_admin } = response.data;
+          // Store user
+          localStorage.setItem("ILO_user", user);
           // Store api token
           localStorage.setItem("auth_token", token);
 
-          // 根据用户角色设置权限
-          const keys = permiss.defaultList[user.email === "admin" ? "admin" : "user"];
+          // Set permission of user
+          const keys = permiss.defaultList[is_admin === 1 ? "admin" : "user"];
           permiss.handleSet(keys);
           router.push("/");
 

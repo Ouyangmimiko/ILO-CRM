@@ -12,8 +12,9 @@ class UserController extends Controller
 
     // Get all users records
     public function index() {
-        $users = User::with(['userRole:is_admin'])
-            ->select('id', 'name', 'email')
+        $users = User::with(['userRoles' => function($query) {
+            $query->select('id', 'user_id', 'is_admin');
+        }])->select('id', 'name', 'email')
             ->get();
         return response()->json($users);
     }
@@ -24,6 +25,28 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    // Update user
-    public function store(Request $request) {}
+    // Add new user
+    public function store(Request $request) {
+        $auth = new AuthController();
+        return $auth->register($request);
+    }
+
+    // Update specific user
+    public function update(Request $request, $id) {
+        $user = User::findOrFail($id);
+
+        $validatedData = $request->validate([
+
+        ]);
+
+    }
+
+    // Delete specific user
+    public function destroy($id) {
+        $user = User::findOrFail($id);
+        $user->delete();
+        return response()->json([
+            'message' => 'User deleted successfully'
+        ]);
+    }
 }

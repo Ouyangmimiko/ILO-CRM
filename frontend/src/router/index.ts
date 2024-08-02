@@ -1,4 +1,4 @@
-import {RouteRecordRaw, createRouter, createWebHashHistory, createWebHistory} from "vue-router";
+import {RouteRecordRaw, createRouter, createWebHistory} from "vue-router";
 import Home from "../views/home.vue";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";

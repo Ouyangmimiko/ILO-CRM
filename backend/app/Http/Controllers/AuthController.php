@@ -36,7 +36,7 @@ class AuthController extends Controller
                 'email' => $request->get('email'),
                 'password' => $request->get('password'),
             ]);
-            $role = $user->userRoles()->creat();
+            $role = $user->userRoles()->create();
 
             return response()->json([
                 'status' => true,
@@ -89,6 +89,7 @@ class AuthController extends Controller
                 'message' => 'Login successfully',
                 'user' => $user,
                 'token' => $token,
+                'is_admin' => $user->isAdmin(),
             ],200);
 
         } catch (\Throwable $exception) {

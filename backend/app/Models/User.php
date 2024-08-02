@@ -52,4 +52,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserRole::class);
     }
+
+    public function isAdmin()
+    {
+        $userRole = $this->userRoles()->first();
+        return $userRole?->is_admin;
+    }
 }

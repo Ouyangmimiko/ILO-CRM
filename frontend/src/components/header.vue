@@ -50,6 +50,7 @@ import { useSidebarStore } from "../store/siderbar";
 import { useRouter } from "vue-router";
 import { Expand, Fold } from "@element-plus/icons-vue";
 import imgurl from "../assets/img/avatar.png";
+import axios from "axios";
 
 const username: string | null = localStorage.getItem("ILO_user_name");
 
@@ -66,10 +67,16 @@ onMounted(() => {
 });
 
 const router = useRouter();
-const handleCommand = (command: string) => {
+const handleCommand = async (command: string) => {
   if (command == "loginout") {
+    const token = localStorage.getItem("auth_token");
     localStorage.removeItem("ILO_user_name");
     router.push("/login");
+    try {
+      await axios.get('/api/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   } else if (command === "user") {
     router.push("/ucenter");
   }
