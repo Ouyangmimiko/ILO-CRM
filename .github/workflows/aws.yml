@@ -91,6 +91,7 @@ jobs:
           php artisan cache:clear
           php artisan route:cache
           php artisan view:cache
+          php artisan clear-compiled
 
           cd /home/ubuntu/web-project
           
@@ -98,11 +99,14 @@ jobs:
           sudo chown -R www-data:www-data /home/ubuntu/web-project/backend
           sudo chown -R www-data:www-data /home/ubuntu/web-project/backend/storage
           sudo chown -R www-data:www-data /home/ubuntu/web-project/backend/bootstrap/cache
-          sudo chmod -R 775 /home/ubuntu/web-project/backend/storage
+          sudo chmod -R 777 /home/ubuntu/web-project/backend/storage
           sudo chmod -R 775 /home/ubuntu/web-project/backend/bootstrap/cache
           sudo chown -R www-data:www-data /home/ubuntu/web-project/frontend
           sudo chown -R www-data:www-data /home/ubuntu/web-project/frontend/dist
 
+          sudo apt-get install php-tokenizer
+          sudo apt-get install php-mbstring
+          sudo apt-get install php-openssl
           # Restart services
           sudo systemctl restart nginx
           sudo systemctl restart php8.3-fpm
