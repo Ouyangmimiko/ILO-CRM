@@ -68,6 +68,8 @@ jobs:
           # Install Composer dependencies
           composer install --optimize-autoloader --no-dev
 
+          
+
           # Creat and update .env
           cp .env.example .env
           sed -i 's/APP_ENV=.*/APP_ENV=production/' .env
@@ -83,7 +85,8 @@ jobs:
 
           # Run database migrations and seeders
           php artisan migrate --force
-          php artisan db:seed --force
+          # php artisan db:seed --force
+          php artisan db:seed --class=UserSeeder
 
           # Clear and cache configuration, routes, and views
           php artisan config:cache
