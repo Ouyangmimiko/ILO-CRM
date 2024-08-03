@@ -106,7 +106,7 @@ jobs:
           sudo chmod -R 775 /home/ubuntu/web-project/backend/bootstrap/cache
           sudo chown -R www-data:www-data /home/ubuntu/web-project/frontend
           sudo chown -R www-data:www-data /home/ubuntu/web-project/frontend/dist
-          sudo chmod -R 755 www-data:www-data /home/ubuntu/web-project/frontend
+          sudo chmod -R 755 /home/ubuntu/web-project/frontend
 
           sudo apt-get install php-tokenizer
           sudo apt-get install php-mbstring
