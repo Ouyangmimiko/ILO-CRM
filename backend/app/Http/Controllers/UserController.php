@@ -12,16 +12,17 @@ class UserController extends Controller
 
     // Get all users records
     public function index() {
-        $users = User::with(['userRoles' => function($query) {
-            $query->select('id', 'user_id', 'is_admin');
-        }])->select('id', 'name', 'email')
-            ->get();
+        $users = User::select('id', 'name', 'email')->get();
+        $users->each(function($user) {
+           $user->is_admin = (bool) $user->isAdmin();
+        });
         return response()->json($users);
     }
 
     // Get specific user
     public function show($id) {
         $user = User::findOrFail($id);
+        $user->is_admin = (bool) $user->isAdmin();
         return response()->json($user);
     }
 
