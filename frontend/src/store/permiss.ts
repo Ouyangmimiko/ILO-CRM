@@ -15,9 +15,13 @@ export const usePermissStore = defineStore("permiss", {
         "YiI-management",
         "projects-management",
       ],
-      user: [],
-    };
-
+      user: [
+        "database-management",
+        "mentor-management",
+        "YiI-management",
+        "projects-management",
+      ],
+    } as ObjectList;
     const username = localStorage.getItem("ILO_user_name");
     return {
       key: (username === "admin"

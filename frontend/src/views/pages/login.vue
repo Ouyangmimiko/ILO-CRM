@@ -111,6 +111,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
           const { user, token, is_admin } = response.data;
           // Store user
           localStorage.setItem("ILO_user", user);
+          localStorage.setItem("User_role", is_admin === 1 ? "admin" : "user");
           // Store api token
           localStorage.setItem("auth_token", token);
 
@@ -119,7 +120,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
           permiss.handleSet(keys);
           router.push("/");
 
-          // 记住登录信息
+          // store login information
           if (checked.value) {
             localStorage.setItem("login-param", JSON.stringify(param));
           } else {
@@ -143,63 +144,6 @@ const submitForm = async (formEl: FormInstance | undefined) => {
   });
 };
 </script>
-
-<!--<script setup lang="ts">-->
-<!--import { ElMessage, FormInstance, FormRules } from "element-plus";-->
-<!--import { reactive, ref } from "vue";-->
-<!--import { useRouter } from "vue-router";-->
-<!--import { usePermissStore } from "../../store/permiss";-->
-
-<!--interface LoginInfo {-->
-<!--  username: string;-->
-<!--  password: string;-->
-<!--}-->
-
-<!--const lgStr = localStorage.getItem("login-param");-->
-<!--const defParam = lgStr ? JSON.parse(lgStr) : null;-->
-<!--const checked = ref(lgStr ? true : false);-->
-
-<!--const router = useRouter();-->
-<!--const param = reactive<LoginInfo>({-->
-<!--  username: defParam ? defParam.username : "",-->
-<!--  password: defParam ? defParam.password : "",-->
-<!--});-->
-
-<!--const rules: FormRules = {-->
-<!--  username: [-->
-<!--    {-->
-<!--      required: true,-->
-<!--      message: "Please Input Username",-->
-<!--      trigger: "blur",-->
-<!--    },-->
-<!--  ],-->
-<!--  password: [-->
-<!--    { required: true, message: "Please Input Password", trigger: "blur" },-->
-<!--  ],-->
-<!--};-->
-<!--const permiss = usePermissStore();-->
-<!--const login = ref<FormInstance>();-->
-<!--const submitForm = (formEl: FormInstance | undefined) => {-->
-<!--  if (!formEl) return;-->
-<!--  formEl.validate((valid: boolean) => {-->
-<!--    if (valid) {-->
-<!--      ElMessage.success("Login Successed");-->
-<!--      localStorage.setItem("ILO_user_name", param.username);-->
-<!--      const keys =-->
-<!--        permiss.defaultList[param.username == "admin" ? "admin" : "user"];-->
-<!--      permiss.handleSet(keys);-->
-<!--      router.push("/");-->
-<!--      if (checked.value) {-->
-<!--        localStorage.setItem("login-param", JSON.stringify(param));-->
-<!--      } else {-->
-<!--        localStorage.removeItem("login-param");-->
-<!--      }-->
-<!--    } else {-->
-<!--      ElMessage.error("Login Failed");-->
-<!--    }-->
-<!--  });-->
-<!--};-->
-<!--</script>-->
 
 <style scoped>
 .login-bg {

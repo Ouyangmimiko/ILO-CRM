@@ -85,11 +85,13 @@ const router = useRouter();
 const handleCommand = async (command: string) => {
   if (command == "logout") {
     localStorage.removeItem("ILO_user_name");
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("ILO_user");
+    localStorage.removeItem("User_role");
+    router.push("/login");
     try {
       await axios.get('/api/logout');
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("ILO_user");
-      router.push("/login");
+
     } catch (error) {
       console.error('Logout error:', error);
     }
