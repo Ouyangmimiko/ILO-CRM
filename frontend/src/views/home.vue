@@ -24,9 +24,40 @@ import { useTabsStore } from "../store/tabs";
 import vHeader from "../components/header.vue";
 import vSidebar from "../components/sidebar.vue";
 import vTabs from "../components/tabs.vue";
+import axios from "../api/axios";
+import {AxiosError} from "axios";
+import {ElMessage} from "element-plus";
+import { useRouter } from "vue-router";
+import {onMounted} from "vue";
 
 const sidebar = useSidebarStore();
 const tabs = useTabsStore();
+const router = useRouter();
+const checkLoginStatus = async () =>
+{
+  try {
+    if (localStorage.getItem("ILO_user")) {
+      await axios.get("/api/loginStatus");
+    }
+    // const response = await axios.get("/api/loginStatus");
+    // console.log(response.data);
+  } catch (error) {
+    if (error instanceof AxiosError && error.response && error.response.data) {
+      // if (error.response.data.error === 'Unauthorized') {
+      //   await router.push("/login");
+      // }
+      localStorage.removeItem("ILO_user_name");
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("ILO_user");
+      localStorage.removeItem("User_role");
+      router.push("/login");
+    } else {
+      ElMessage.error("An unexpected error occurred while getting users.");
+    }
+  }
+}
+onMounted(checkLoginStatus);
+console.log(localStorage.getItem("User_role"));
 </script>
 
 <style>

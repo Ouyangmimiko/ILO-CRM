@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Schema;
 
 class UserController extends Controller
 {
@@ -16,7 +17,11 @@ class UserController extends Controller
         $users->each(function($user) {
            $user->is_admin = (bool) $user->isAdmin();
         });
-        return response()->json($users);
+        $fields = array_keys($users->first()->toArray());
+        return response()->json([
+            'fields' => $fields,
+            'users' => $users,
+        ]);
     }
 
     // Get specific user
