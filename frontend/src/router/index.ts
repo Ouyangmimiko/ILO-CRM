@@ -148,7 +148,6 @@ router.beforeEach((to, _, next) => {
   NProgress.start();
   const role = localStorage.getItem("ILO_user_name");
   const permiss = usePermissStore();
-
   if (!role && !to.meta.noAuth) {
     next("/login");
   } else if (

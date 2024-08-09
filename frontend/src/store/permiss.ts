@@ -22,13 +22,19 @@ export const usePermissStore = defineStore("permiss", {
         "projects-management",
       ],
     } as ObjectList;
-    const username = localStorage.getItem("ILO_user_name");
+    const role = localStorage.getItem("User_role");
     return {
-      key: (username === "admin"
-        ? defaultList.admin
-        : defaultList.user) as string[],
+      key: (role === "admin"? defaultList.admin
+          : defaultList.user) as string[],
       defaultList,
-    };
+    }
+    // const username = localStorage.getItem("ILO_user_name");
+    // return {
+    //   key: (username === "admin"
+    //     ? defaultList.admin
+    //     : defaultList.user) as string[],
+    //   defaultList,
+    // };
   },
   actions: {
     handleSet(val: string[]) {

@@ -106,11 +106,12 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 
         if (response.data.status) {
           ElMessage.success(response.data.message);
-          localStorage.setItem("ILO_user_name", param.email);
+
 
           const { user, token, is_admin } = response.data;
           // Store user
           localStorage.setItem("ILO_user", user);
+          localStorage.setItem("ILO_user_name", user.name);
           localStorage.setItem("User_role", is_admin === 1 ? "admin" : "user");
           // Store api token
           localStorage.setItem("auth_token", token);
@@ -135,7 +136,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         if (error instanceof AxiosError && error.response && error.response.data) {
           ElMessage.error(error.response.data.message);
         } else {
-          ElMessage.error("An unexpected error occurred.");
+          ElMessage.error("An unexpected error occurred while logging in.");
         }
       }
     } else {
@@ -143,6 +144,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     }
   });
 };
+console.log(permiss.key);
 </script>
 
 <style scoped>
