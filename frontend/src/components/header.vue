@@ -84,17 +84,16 @@ onMounted(() => {
 const router = useRouter();
 const handleCommand = async (command: string) => {
   if (command == "logout") {
+    try {
+      await axios.get('/api/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
     localStorage.removeItem("ILO_user_name");
     localStorage.removeItem("auth_token");
     localStorage.removeItem("ILO_user");
     localStorage.removeItem("User_role");
     router.push("/login");
-    try {
-      await axios.get('/api/logout');
-
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
   } else if (command === "user") {
     router.push("/ucenter");
   } else if (command === "login") {
