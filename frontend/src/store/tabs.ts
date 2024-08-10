@@ -22,24 +22,19 @@ export const useTabsStore = defineStore("tabs", {
   },
   actions: {
     delTabsItem(index: number) {
-      console.log('Deleting item at index:', index);
       this.list.splice(index, 1);
     },
     setTabsItem(data: ListItem) {
-      console.log('Setting tab item:', data);
       this.list.push(data);
     },
     clearTabs() {
-      console.log('Clearing all tabs');
       this.list = [];
     },
     closeTabsOther(data: ListItem[]) {
-      console.log('Closing other tabs:', data);
       this.list = data;
     },
-    closeCurrentTab(data: any) {
+    closeCurrentTag(data: any) {
       for (let i = 0, len = this.list.length; i < len; i++) {
-        console.log('Closing current tag:', data.$route.fullPath);
         const item = this.list[i];
         if (item.path === data.$route.fullPath) {
           if (i < len - 1) {

@@ -1,4 +1,4 @@
-import {RouteRecordRaw, createRouter, createWebHistory} from "vue-router";
+import { RouteRecordRaw, createRouter, createWebHashHistory } from "vue-router";
 import Home from "../views/home.vue";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
@@ -140,7 +140,7 @@ const routes: RouteRecordRaw[] = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes,
 });
 
@@ -148,6 +148,7 @@ router.beforeEach((to, _, next) => {
   NProgress.start();
   const role = localStorage.getItem("ILO_user_name");
   const permiss = usePermissStore();
+
   if (!role && !to.meta.noAuth) {
     next("/login");
   } else if (

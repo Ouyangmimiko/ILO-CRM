@@ -335,13 +335,13 @@ const handleAdd = () => {
   dialogVisible.value = true;
 };
 
-const handleEdit = (_index: number, row: ITableData) => {
+const handleEdit = (index: number, row: ITableData) => {
   isEdit.value = true;
   Object.assign(editForm, row);
   dialogVisible.value = true;
 };
 
-const handleDelete = (_index: number, _row: ITableData) => {
+const handleDelete = (index: number, row: ITableData) => {
   alert("TODO: Delete Data -> wait backend api");
 };
 

@@ -8,86 +8,55 @@
       :text-color="sidebar.textColor"
       router
     >
-      <template v-for="item in filteredMenuData" :key="item.id">
+      <template v-for="item in menuData">
         <template v-if="item.children">
-          <el-sub-menu :index="item.index">
+          <el-sub-menu
+            :index="item.index"
+            :key="item.index"
+            v-permiss="item.id"
+          >
             <template #title>
               <el-icon>
                 <component :is="item.icon"></component>
               </el-icon>
               <span>{{ item.title }}</span>
             </template>
-            <template v-for="subItem in item.children" :key="subItem.id">
-              <el-sub-menu v-if="subItem.children" :index="subItem.index">
+
+            <template v-for="subItem in item.children">
+              <el-sub-menu
+                v-if="subItem.children"
+                :index="subItem.index"
+                :key="subItem.index"
+                v-permiss="item.id"
+              >
                 <template #title>{{ subItem.title }}</template>
-                <el-menu-item v-for="threeItem in subItem.children" :key="threeItem.id" :index="threeItem.index">
+                <el-menu-item
+                  v-for="(threeItem, i) in subItem.children"
+                  :key="i"
+                  :index="threeItem.index"
+                >
                   {{ threeItem.title }}
                 </el-menu-item>
               </el-sub-menu>
-              <el-menu-item v-else :index="subItem.index">
+              <el-menu-item v-else :index="subItem.index" v-permiss="item.id">
                 {{ subItem.title }}
               </el-menu-item>
             </template>
           </el-sub-menu>
         </template>
         <template v-else>
-          <el-menu-item :index="item.index">
+          <el-menu-item
+            :index="item.index"
+            :key="item.index"
+            v-permiss="item.id"
+          >
             <el-icon>
               <component :is="item.icon"></component>
             </el-icon>
-            <span>{{ item.title }}</span>
+            <template #title>{{ item.title }}</template>
           </el-menu-item>
         </template>
       </template>
-<!--      <template v-for="item in menuData">-->
-<!--        <template v-if="item.children">-->
-<!--          <el-sub-menu-->
-<!--            :index="item.index"-->
-<!--            :key="item.index"-->
-<!--            v-permiss="item.id"-->
-<!--          >-->
-<!--            <template #title>-->
-<!--              <el-icon>-->
-<!--                <component :is="item.icon"></component>-->
-<!--              </el-icon>-->
-<!--              <span>{{ item.title }}</span>-->
-<!--            </template>-->
-
-<!--            <template v-for="subItem in item.children">-->
-<!--              <el-sub-menu-->
-<!--                v-if="subItem.children"-->
-<!--                :index="subItem.index"-->
-<!--                :key="subItem.index"-->
-<!--                v-permiss="item.id"-->
-<!--              >-->
-<!--                <template #title>{{ subItem.title }}</template>-->
-<!--                <el-menu-item-->
-<!--                  v-for="(threeItem, i) in subItem.children"-->
-<!--                  :key="i"-->
-<!--                  :index="threeItem.index"-->
-<!--                >-->
-<!--                  {{ threeItem.title }}-->
-<!--                </el-menu-item>-->
-<!--              </el-sub-menu>-->
-<!--              <el-menu-item v-else :index="subItem.index" v-permiss="item.id">-->
-<!--                {{ subItem.title }}-->
-<!--              </el-menu-item>-->
-<!--            </template>-->
-<!--          </el-sub-menu>-->
-<!--        </template>-->
-<!--        <template v-else>-->
-<!--          <el-menu-item-->
-<!--            :index="item.index"-->
-<!--            :key="item.index"-->
-<!--            v-permiss="item.id"-->
-<!--          >-->
-<!--            <el-icon>-->
-<!--              <component :is="item.icon"></component>-->
-<!--            </el-icon>-->
-<!--            <template #title>{{ item.title }}</template>-->
-<!--          </el-menu-item>-->
-<!--        </template>-->
-<!--      </template>-->
     </el-menu>
   </div>
 </template>
@@ -97,7 +66,6 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { useSidebarStore } from "../store/siderbar";
 import { menuData } from "./menu";
-import {Menus} from "../types/menu.ts";
 
 const route = useRoute();
 const onRoutes = computed(() => {
@@ -105,28 +73,6 @@ const onRoutes = computed(() => {
 });
 
 const sidebar = useSidebarStore();
-let userRole = localStorage.getItem("User_role");
-// Menus the current user have permissions to use
-const filteredMenuData = computed(() => {
-  function filterMenu(menu: Menus[]): Menus[] {
-    return menu.filter((item: Menus): boolean => {
-      if (!userRole) {
-        userRole = "noAuth";
-      }
-      if (item.permissions) {
-        return item.permissions.includes(userRole);
-      } else if (!item.permissions) {
-        return true;
-      }
-      if (item.children) {
-        item.children = filterMenu(item.children);
-        return item.children.length > 0;
-      }
-      return true;
-    });
-  }
-  return filterMenu(menuData);
-});
 </script>
 
 <style scoped>

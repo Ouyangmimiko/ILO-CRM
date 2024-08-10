@@ -6,8 +6,8 @@
         <div class="login-title">ILO CRM</div>
       </div>
       <el-form :model="param" :rules="rules" ref="login" size="large">
-        <el-form-item prop="email">
-          <el-input v-model="param.email" placeholder="Email">
+        <el-form-item prop="username">
+          <el-input v-model="param.username" placeholder="User name">
             <template #prepend>
               <el-icon>
                 <User />
@@ -65,10 +65,9 @@ import { ElMessage, FormInstance, FormRules } from "element-plus";
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { usePermissStore } from "../../store/permiss";
-import axios, {AxiosError} from "axios";
 
 interface LoginInfo {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -78,13 +77,17 @@ const checked = ref(lgStr ? true : false);
 
 const router = useRouter();
 const param = reactive<LoginInfo>({
-  email: defParam ? defParam.email : "",
+  username: defParam ? defParam.username : "",
   password: defParam ? defParam.password : "",
 });
 
 const rules: FormRules = {
-  email: [
-    { required: true, message: "Please Input Email", trigger: "blur" },
+  username: [
+    {
+      required: true,
+      message: "Please Input Username",
+      trigger: "blur",
+    },
   ],
   password: [
     { required: true, message: "Please Input Password", trigger: "blur" },
@@ -92,59 +95,26 @@ const rules: FormRules = {
 };
 const permiss = usePermissStore();
 const login = ref<FormInstance>();
-
-const submitForm = async (formEl: FormInstance | undefined) => {
+const submitForm = (formEl: FormInstance | undefined) => {
   if (!formEl) return;
-  formEl.validate(async (valid: boolean) => {
+  formEl.validate((valid: boolean) => {
     if (valid) {
-      try {
-        // sen request to /api/login
-        const response = await axios.post("/api/login", {
-          email: param.email,
-          password: param.password,
-        });
-
-        if (response.data.status) {
-          ElMessage.success(response.data.message);
-
-
-          const { user, token, is_admin } = response.data;
-          // Store user
-          localStorage.setItem("ILO_user", user);
-          localStorage.setItem("ILO_user_name", user.name);
-          localStorage.setItem("User_role", is_admin === 1 ? "admin" : "user");
-          // Store api token
-          localStorage.setItem("auth_token", token);
-
-          // Set permission of user
-          const keys = permiss.defaultList[is_admin === 1 ? "admin" : "user"];
-          permiss.handleSet(keys);
-          router.push("/");
-
-          // store login information
-          if (checked.value) {
-            localStorage.setItem("login-param", JSON.stringify(param));
-          } else {
-            localStorage.removeItem("login-param");
-          }
-        } else {
-          // Handle login exception
-          ElMessage.error(response.data.message);
-        }
-      } catch (error) {
-        // Handle errors, show error message from server
-        if (error instanceof AxiosError && error.response && error.response.data) {
-          ElMessage.error(error.response.data.message);
-        } else {
-          ElMessage.error("An unexpected error occurred while logging in.");
-        }
+      ElMessage.success("Login Successed");
+      localStorage.setItem("ILO_user_name", param.username);
+      const keys =
+        permiss.defaultList[param.username == "admin" ? "admin" : "user"];
+      permiss.handleSet(keys);
+      router.push("/");
+      if (checked.value) {
+        localStorage.setItem("login-param", JSON.stringify(param));
+      } else {
+        localStorage.removeItem("login-param");
       }
     } else {
-      ElMessage.error("Please complete the form correctly.");
+      ElMessage.error("Login Failed");
     }
   });
 };
-console.log(permiss.key);
 </script>
 
 <style scoped>
