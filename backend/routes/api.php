@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\CustomerExportController;
+use App\Http\Controllers\CustomerImportController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\EnsureAdminRole;
 use Illuminate\Support\Facades\Route;
@@ -28,3 +31,11 @@ Route::middleware(['auth:sanctum', EnsureAdminRole::class])->group(function () {
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 });
+
+Route::post('/create', [CustomerController::class, 'store']);
+Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
+Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('customers.show');
+Route::put('/update/{id}', [CustomerController::class, 'update']);
+Route::get('/customers', [CustomerController::class, 'search']);
+Route::post('/import', [CustomerImportController::class, 'import']);
+Route::get('/export', [CustomerExportController::class, 'export']);

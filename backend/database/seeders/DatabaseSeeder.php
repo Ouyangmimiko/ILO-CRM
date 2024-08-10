@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Customer;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -16,14 +17,6 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'admin',
-            'email' => 'admin@admin.com',
-            'password' => Hash::make('iamAdmin_user'),
-        ]);
-        $adminUser = User::where('email', 'admin@admin.com')->first();
-        $role = $adminUser->userRoles()->create([
-            'is_admin' => true,
-        ]);
+        Customer::factory()->count(1)->create();
     }
 }
