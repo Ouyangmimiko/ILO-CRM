@@ -30,6 +30,7 @@ import {ElMessage} from "element-plus";
 import { useRouter } from "vue-router";
 import {onMounted} from "vue";
 
+
 const sidebar = useSidebarStore();
 const tabs = useTabsStore();
 const router = useRouter();
@@ -56,8 +57,10 @@ const checkLoginStatus = async () =>
     }
   }
 }
-onMounted(checkLoginStatus);
-console.log(localStorage.getItem("User_role"));
+onMounted(() => {
+  checkLoginStatus();
+  console.log('Tabs nameList:', tabs.nameList);
+});
 </script>
 
 <style>

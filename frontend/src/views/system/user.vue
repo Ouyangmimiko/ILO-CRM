@@ -1,40 +1,44 @@
 <template>
-  <h1>User Management</h1>
-
-  <el-table :data="users" style="width: 100%">
-    <el-table-column
-        v-for="field in fields"
-        :key="field"
-        :prop="field"
-        :label="field"
-    ></el-table-column>
-  </el-table>
   <div>
-    <el-button type="primary" @click="showCreatUserDialog">Creat New User</el-button>
-    <!--  Dialog of creating user-->
-    <el-dialog
-        title="Creat New User"
-        v-model="isDialogVisible"
-        width="500px"
-        @close="resetForm"
-    >
-      <el-form :model="newUser" ref="formRef" label-width="120px">
-        <el-form-item label="Name" prop="name" :rules="[{ required: true, message: 'Name is required', trigger: 'blur' }]">
-          <el-input v-model="newUser.name" />
-        </el-form-item>
-        <el-form-item label="Email" prop="email" :rules="[{ required: true, message: 'Email is required', trigger: 'blur' }]">
-          <el-input v-model="newUser.email" />
-        </el-form-item>
-        <el-form-item label="Password">
-          <el-input v-model="newUser.password" type="password" />
-          <small style="color: #888;">Default password: abc123</small>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="isDialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="creatUser">Confirm</el-button>
-      </div>
-    </el-dialog></div>
+    <h1>User Management</h1>
+
+    <el-table :data="users" style="width: 100%">
+      <el-table-column
+          v-for="field in fields"
+          :key="field"
+          :prop="field"
+          :label="field"
+      ></el-table-column>
+    </el-table>
+
+    <div>
+      <el-button type="primary" @click="showCreatUserDialog">Create New User</el-button>
+      <!-- Dialog of creating user -->
+      <el-dialog
+          title="Create New User"
+          v-model="isDialogVisible"
+          width="500px"
+          @close="resetForm"
+      >
+        <el-form :model="newUser" ref="formRef" label-width="120px">
+          <el-form-item label="Name" prop="name" :rules="[{ required: true, message: 'Name is required', trigger: 'blur' }]">
+            <el-input v-model="newUser.name" />
+          </el-form-item>
+          <el-form-item label="Email" prop="email" :rules="[{ required: true, message: 'Email is required', trigger: 'blur' }]">
+            <el-input v-model="newUser.email" />
+          </el-form-item>
+          <el-form-item label="Password">
+            <el-input v-model="newUser.password" type="password" />
+            <small style="color: #888;">Default password: abc123</small>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="isDialogVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="creatUser">Confirm</el-button>
+        </div>
+      </el-dialog>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -66,7 +70,6 @@ const resetForm = () => {
   newUser.email = '';
   newUser.password = 'abc123';
 };
-console.log(isDialogVisible.value)
 const getUsers = async () => {
   try {
     const usersData = await axios.get("/api/users");
@@ -82,7 +85,6 @@ const getUsers = async () => {
   }
 };
 onMounted(getUsers);
-console.log(isDialogVisible.value)
 const creatUser = async () => {
   if (formRef.value) {
     await formRef.value.validate();
@@ -99,5 +101,5 @@ const creatUser = async () => {
       ElMessage.error('An unexpected error occurred while creating user.');
     }
   }
-}
+};
 </script>
