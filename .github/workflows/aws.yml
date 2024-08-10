@@ -67,8 +67,7 @@ jobs:
 
           # Install Composer dependencies
           composer install --optimize-autoloader --no-dev
-
-          
+          composer require fakerphp/faker
 
           # Creat and update .env
           cp .env.example .env
