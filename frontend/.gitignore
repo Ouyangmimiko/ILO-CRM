@@ -1,3 +1,6 @@
+<<<<<<< HEAD
+.idea
+=======
 # Logs
 logs
 *.log
@@ -22,3 +25,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+>>>>>>> 100f8ccb5d3ef7cc93a28bc2e945aa72caef376d

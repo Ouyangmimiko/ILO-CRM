@@ -15,16 +15,26 @@ export const usePermissStore = defineStore("permiss", {
         "YiI-management",
         "projects-management",
       ],
-      user: [],
-    };
-
-    const username = localStorage.getItem("ILO_user_name");
+      user: [
+        "database-management",
+        "mentor-management",
+        "YiI-management",
+        "projects-management",
+      ],
+    } as ObjectList;
+    const role = localStorage.getItem("User_role");
     return {
-      key: (username === "admin"
-        ? defaultList.admin
-        : defaultList.user) as string[],
+      key: (role === "admin"? defaultList.admin
+          : defaultList.user) as string[],
       defaultList,
-    };
+    }
+    // const username = localStorage.getItem("ILO_user_name");
+    // return {
+    //   key: (username === "admin"
+    //     ? defaultList.admin
+    //     : defaultList.user) as string[],
+    //   defaultList,
+    // };
   },
   actions: {
     handleSet(val: string[]) {

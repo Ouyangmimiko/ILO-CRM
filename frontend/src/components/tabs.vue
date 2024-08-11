@@ -13,11 +13,11 @@
         :key="item.path"
         :label="item.title"
         :name="item.path"
-        @click="setTags(item)"
+        @click="setTabs(item)"
       ></el-tab-pane>
     </el-tabs>
     <div class="tabs-close-box">
-      <el-dropdown @command="handleTags">
+      <el-dropdown @command="handleTabs">
         <el-button size="small" type="primary" plain>
           Tags Options
           <el-icon class="el-icon--right">
@@ -46,8 +46,8 @@ const router = useRouter();
 const activePath = ref(route.fullPath);
 const tabs = useTabsStore();
 
-// Set Tags
-const setTags = (route: any) => {
+// Set Tabs
+const setTabs = (route: any) => {
   const isExist = tabs.list.some((item) => {
     return item.path === route.fullPath;
   });
@@ -59,12 +59,12 @@ const setTags = (route: any) => {
     });
   }
 };
-setTags(route);
+setTabs(route);
 onBeforeRouteUpdate((to) => {
-  setTags(to);
+  setTabs(to);
 });
 
-// cloase all tags
+// close all tags
 const closeAll = () => {
   tabs.clearTabs();
   router.push("/");
@@ -76,10 +76,10 @@ const closeOther = () => {
   tabs.closeTabsOther(curItem);
 };
 
-const handleTags = (command: string) => {
+const handleTabs = (command: string) => {
   switch (command) {
     case "current":
-      tabs.closeCurrentTag({
+      tabs.closeCurrentTab({
         $router: router,
         $route: route,
       });
@@ -105,7 +105,7 @@ const closeTabs = (path: string) => {
 
 watch(
   () => route.fullPath,
-  (newVal, oldVal) => {
+  (newVal, _oldVal) => {
     activePath.value = newVal;
   }
 );

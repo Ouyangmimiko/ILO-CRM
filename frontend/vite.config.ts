@@ -23,9 +23,9 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": {
-        // target: "http://localhost:8000",
-        target: "http://13.43.95.151/",
+      '/api': {
+        target: "http://localhost:8000",
+        // target: "http://13.43.95.151/",
         changeOrigin: true,
       },
     },

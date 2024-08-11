@@ -1,3 +1,4 @@
 .idea
 *.Zone.Identifier
 *:Zone.Identifier
+/frontend/.vscode

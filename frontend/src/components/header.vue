@@ -16,40 +16,56 @@
     <div class="header-right">
       <div class="header-user-con">
         <div class="btn-icon" @click="router.push('/theme')">
-          <el-tooltip effect="dark" content="Theme Setting" placement="bottom">
+          <el-tooltip effect="light" content="Theme Setting" placement="bottom">
+            <el-icon><Bell /></el-icon>
             <i class="el-icon-lx-skin"></i>
           </el-tooltip>
         </div>
-        <!-- User Avatar -->
-        <el-avatar class="user-avator" :size="30" :src="imgurl" />
-        <!-- User Info -->
-        <el-dropdown class="user-name" trigger="click" @command="handleCommand">
+        <!--Have logged in-->
+        <template v-if="isLoggedIn">
+          <!-- User Avatar -->
+          <el-avatar class="user-avator" :size="30" :src="imgurl" />
+          <!-- User Info -->
+          <el-dropdown class="user-name" trigger="click" @command="handleCommand">
           <span class="el-dropdown-link">
             {{ username }}
             <el-icon class="el-icon--right">
               <arrow-down />
             </el-icon>
           </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="user">User Center</el-dropdown-item>
-              <el-dropdown-item divided command="loginout">
-                Log out
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="user">User Center</el-dropdown-item>
+                <el-dropdown-item divided command="logout">
+                  Log out
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </template>
+        <!--Not logged in-->
+        <template v-else>
+          <!-- Log In Button -->
+          <el-button type="primary" @click="handleCommand('login')">
+            Log In
+          </el-button>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, computed } from "vue";
 import { useSidebarStore } from "../store/siderbar";
 import { useRouter } from "vue-router";
 import { Expand, Fold } from "@element-plus/icons-vue";
 import imgurl from "../assets/img/avatar.png";
+import axios from "../api/axios";
+
+const isLoggedIn = computed(() => {
+  return !!localStorage.getItem("ILO_user");
+});
 
 const username: string | null = localStorage.getItem("ILO_user_name");
 
@@ -66,12 +82,22 @@ onMounted(() => {
 });
 
 const router = useRouter();
-const handleCommand = (command: string) => {
-  if (command == "loginout") {
+const handleCommand = async (command: string) => {
+  if (command == "logout") {
+    try {
+      await axios.get('/api/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
     localStorage.removeItem("ILO_user_name");
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("ILO_user");
+    localStorage.removeItem("User_role");
     router.push("/login");
   } else if (command === "user") {
     router.push("/ucenter");
+  } else if (command === "login") {
+    router.push("/login");
   }
 };
 </script>
