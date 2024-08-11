@@ -9,6 +9,13 @@
           :prop="field"
           :label="field"
       ></el-table-column>
+      <el-table-column label="Actions">
+        <template v-slot="scope">
+          <template v-if="showDeletButtonCondition(scope.row.is_admin)">
+            <el-button @click="showDeleteDialog(scope.row.id)" type="danger" size="small">Delete</el-button>
+          </template>
+        </template>
+      </el-table-column>
     </el-table>
 
     <div>
@@ -37,6 +44,20 @@
           <el-button type="primary" @click="creatUser">Confirm</el-button>
         </div>
       </el-dialog>
+
+      <!-- Dialog for deleting a user -->
+      <el-dialog
+          title="Confirm Deletion"
+          v-model="isDeleteDialogVisible"
+          width="300px"
+          @close="resetDeleteDialog"
+      >
+        <span>Are you sure you want to delete this user?</span>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="isDeleteDialogVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="confirmDelete">Confirm</el-button>
+        </div>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -49,7 +70,11 @@ import {ElMessage} from "element-plus";
 
 const fields = ref<string[]>([]);
 const users = ref([]);
+// creat new user dialog
 const isDialogVisible = ref(false);
+// delete user dialog
+const isDeleteDialogVisible = ref(false);
+const userIdToDelete = ref(null);
 
 const newUser = reactive({
   name: '',
@@ -102,4 +127,30 @@ const creatUser = async () => {
     }
   }
 };
+
+// Delete user dialog
+const showDeletButtonCondition = (isAdmin: any) => {
+  return isAdmin !== true;
+
+}
+const showDeleteDialog = (userId: any) => {
+  userIdToDelete.value = userId;
+  isDeleteDialogVisible.value = true;
+}
+const confirmDelete = async () => {
+  try {
+    if (userIdToDelete.value !== null) {
+      await axios.delete(`/api/users/${userIdToDelete.value}`);
+      // users.value = users.value.filter(user => (user as { id: number }).id !== userIdToDelete.value);
+      await getUsers();
+      isDeleteDialogVisible.value = false;
+      userIdToDelete.value = null;
+    }
+  } catch (error) {
+    ElMessage.error('An error occurred while deleting the user.');
+  }
+};
+const resetDeleteDialog = () => {
+  userIdToDelete.value = null;
+}
 </script>
