@@ -50,7 +50,7 @@ jobs:
 
     # Copy front-end build files to EC2
     - name: Copy front-end build files to EC2
-      run: rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./frontend/dist/* ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }}:/home/ubuntu/web-project/frontend/
+      run: rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./frontend/* ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }}:/home/ubuntu/web-project/frontend/
 
     # Copy back-end files to EC2
     - name: Copy back-end files to EC2
@@ -67,6 +67,7 @@ jobs:
 
           # Install Composer dependencies
           composer install --optimize-autoloader --no-dev
+          composer require fakerphp/faker
 
           # Creat and update .env
           cp .env.example .env
@@ -76,14 +77,15 @@ jobs:
           sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
           sed -i 's/DB_DATABASE=laravel/DB_DATABASE=test/' .env  
           sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env  
-          sed -i 's/DB_PASSWORD=/DB_PASSWORD=/' .env
+          sed -i 's/DB_PASSWORD=/DB_PASSWORD=root_Abc123/' .env
 
           # Generate application key
           php artisan key:generate
 
           # Run database migrations and seeders
           php artisan migrate --force
-          php artisan db:seed --force
+          # php artisan db:seed --force
+          php artisan db:seed --class=UserSeeder
 
           # Clear and cache configuration, routes, and views
           php artisan config:cache
@@ -91,18 +93,26 @@ jobs:
           php artisan cache:clear
           php artisan route:cache
           php artisan view:cache
+          php artisan clear-compiled
 
           cd /home/ubuntu/web-project
           
           # Set appropriate permissions
           sudo chown -R www-data:www-data /home/ubuntu/web-project/backend
+          sudo chmod -R 755 /home/ubuntu/web-project/backend
+
+          sudo chown -R www-data:www-data /home/ubuntu/web-project/backend
           sudo chown -R www-data:www-data /home/ubuntu/web-project/backend/storage
           sudo chown -R www-data:www-data /home/ubuntu/web-project/backend/bootstrap/cache
-          sudo chmod -R 775 /home/ubuntu/web-project/backend/storage
+          sudo chmod -R 777 /home/ubuntu/web-project/backend/storage
           sudo chmod -R 775 /home/ubuntu/web-project/backend/bootstrap/cache
           sudo chown -R www-data:www-data /home/ubuntu/web-project/frontend
           sudo chown -R www-data:www-data /home/ubuntu/web-project/frontend/dist
+          sudo chmod -R 755 /home/ubuntu/web-project/frontend
 
+          sudo apt-get install php-tokenizer
+          sudo apt-get install php-mbstring
+          sudo apt-get install php-openssl
           # Restart services
           sudo systemctl restart nginx
           sudo systemctl restart php8.3-fpm
