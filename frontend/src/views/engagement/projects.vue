@@ -1,7 +1,6 @@
 <template>
   <div class="container">
     <!-- form -->
-
     <el-form :model="queryForm" inline class="query-form styled-form">
       <el-form-item label="ORGANISATION">
         <el-input
@@ -99,7 +98,6 @@
       <el-table-column prop="JOB TITLE" label="JOB TITLE" width="120" />
       <el-table-column prop="EMAIL ADDRESS" label="EMAIL ADDRESS" width="120" />
       <el-table-column prop="LOCATION" label="LOCATION" width="120" />
-      <el-table-column prop="LOCATION" label="LOCATION" width="120" />
       <el-table-column
         prop="Programme of study engaged"
         label="Programme of study engaged"
@@ -107,13 +105,13 @@
       />
       <el-table-column fixed="right" label="Operations" min-width="150">
         <template #default="scope">
-          <el-button size="small" @click="handleEdit(scope.$index, scope.row)">
+          <el-button size="small" @click="handleEdit(scope.row)">
             Edit
           </el-button>
           <el-button
             size="small"
             type="danger"
-            @click="handleDelete(scope.$index, scope.row)"
+            @click="handleDelete(scope.$index)"
           >
             Delete
           </el-button>
@@ -160,7 +158,7 @@
           <el-input v-model="editForm['EMAIL ADDRESS']" />
         </el-form-item>
         <el-form-item label="LOCATION">
-          <el-input v-model="editForm['LOCATION']" />
+          <el-input v-model="editForm.LOCATION" />
         </el-form-item>
         <el-form-item label="UoB ALUMNI">
           <el-input v-model="editForm['UoB ALUMNI']" />
@@ -171,9 +169,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="dialogVisible = false"
-          >Confirm</el-button
-        >
+        <el-button type="primary" @click="confirmEdit">Confirm</el-button>
       </span>
     </el-dialog>
   </div>
@@ -250,7 +246,7 @@ const exportExcel = () => {
   alert("TODO: Export Data");
 };
 
-const tableData = ref([
+const tableData = ref<ITableData[]>([
   {
     ORGANISATION: "Actisense – Active Research Limited",
     "ORGANISATION SECTOR": "ICT",
@@ -335,13 +331,15 @@ const handleAdd = () => {
   dialogVisible.value = true;
 };
 
-const handleEdit = (index: number, row: ITableData) => {
+const handleEdit = (row: ITableData) => {
   isEdit.value = true;
   Object.assign(editForm, row);
   dialogVisible.value = true;
 };
 
-const handleDelete = (index: number, row: ITableData) => {
+const handleDelete = (index: number) => {
+  tableData.value.splice(index, 1); // 从数据中删除指定的项
+  total.value = tableData.value.length; // 更新总数以反映更改
   alert("TODO: Delete Data -> wait backend api");
 };
 
@@ -361,6 +359,17 @@ const handleClose = (done: () => void) => {
     .catch(() => {
       // catch error
     });
+};
+
+const confirmEdit = () => {
+  if (isEdit.value) {
+    // TODO: Implement edit logic
+    alert("TODO: Edit Data -> wait backend api");
+  } else {
+    // TODO: Implement add logic
+    alert("TODO: Add Data -> wait backend api");
+  }
+  dialogVisible.value = false;
 };
 </script>
 

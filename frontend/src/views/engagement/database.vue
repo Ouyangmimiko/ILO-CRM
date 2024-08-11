@@ -488,11 +488,11 @@ const handleBeforeUpload = (file: string | Blob) => {
         "Content-Type": "multipart/form-data",
       },
     })
-    .then((response) => {
+    .then(() => {
       ElMessage.success("File uploaded successfully");
       handleQuery(); // Refresh data after successful upload
     })
-    .catch((error) => {
+    .catch(() => {
       ElMessage.error("Error uploading file");
     });
 
@@ -508,8 +508,8 @@ const handleRemove = () => {
 const exportExcel = () => {
   axios
     .get("/api/export", { responseType: "blob" })
-    .then((response) => {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+    .then(() => {
+      const url = window.URL.createObjectURL(new Blob());
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", "export.xlsx"); // You can specify the file name here
