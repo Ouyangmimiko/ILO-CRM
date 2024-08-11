@@ -21,4 +21,13 @@ export default defineConfig({
       "~": "/src/assets",
     },
   },
+  server: {
+    proxy: {
+      "/api": {
+        // target: "http://localhost:8000",
+        target: "http://13.43.95.151/",
+        changeOrigin: true,
+      },
+    },
+  },
 });
