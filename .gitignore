@@ -3,3 +3,4 @@
 *:Zone.Identifier
 /frontend/.vscode
 /frontend/.vite
+/node_modules

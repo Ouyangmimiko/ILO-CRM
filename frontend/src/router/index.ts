@@ -33,7 +33,7 @@ const routes: RouteRecordRaw[] = [
         },
         component: () =>
           import(
-            /* webpackChunkName: "system-user" */ "../views/system/user.vue"
+            /* webpackChunkName: "system-user" */ "../views/system/userManager.vue"
           ),
       },
       {
@@ -45,7 +45,7 @@ const routes: RouteRecordRaw[] = [
         },
         component: () =>
           import(
-            /* webpackChunkName: "system-user" */ "../views/system/role.vue"
+            /* webpackChunkName: "system-user" */ "../views/system/userRoleManager.vue"
           ),
       },
       {
