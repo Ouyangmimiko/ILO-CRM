@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -42,9 +43,28 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validatedData = $request->validate([
-
+            'name' => [
+                'required',
+                'max:255',
+                Rule::unique('users')->ignore($user->id)
+            ],
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users')->ignore($user->id)
+            ],
+            'is_admin' => 'required|boolean',
         ]);
 
+        $user->name = $validatedData['name'];
+        $user->email = $validatedData['email'];
+        $userRole = $user->userRoles()->first();
+        $userRole->is_admin = $validatedData['is_admin'];
+
+        $user->save();
+        $userRole->save();
+
+        return response()->json(['message' => 'User updated successfully']);
     }
 
     // Delete specific user
