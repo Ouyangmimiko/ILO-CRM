@@ -51,7 +51,7 @@ const checkLoginStatus = async () =>
       localStorage.removeItem("auth_token");
       localStorage.removeItem("ILO_user");
       localStorage.removeItem("User_role");
-      router.push("/login");
+      await router.push("/login");
     } else {
       ElMessage.error("An unexpected error occurred while getting users.");
     }
