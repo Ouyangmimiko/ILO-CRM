@@ -1,17 +1,20 @@
 <template>
   <div>
     <h1>User Management</h1>
-
+    <div class="creatUserButton">
+      <el-button type="primary" @click="showCreatUserDialog">Create New User</el-button>
+    </div>
     <el-table :data="users" style="width: 100%">
       <el-table-column
-          v-for="field in fields"
+          v-for="field in selectedFields"
           :key="field"
           :prop="field"
-          :label="field"
+          :label="getColumnLabel(field)"
+          :formatter="getFieldFormatter(field)"
       ></el-table-column>
       <el-table-column label="Actions">
         <template v-slot="scope">
-          <template v-if="showDeletButtonCondition(scope.row.is_admin)">
+          <template v-if="showDeleteButtonCondition(scope.row.is_admin)">
             <el-button @click="showDeleteDialog(scope.row.id)" type="danger" size="small">Delete</el-button>
           </template>
         </template>
@@ -19,7 +22,7 @@
     </el-table>
 
     <div>
-      <el-button type="primary" @click="showCreatUserDialog">Create New User</el-button>
+
       <!-- Dialog of creating user -->
       <el-dialog
           title="Create New User"
@@ -70,6 +73,7 @@ import {ElMessage} from "element-plus";
 
 const fields = ref<string[]>([]);
 const users = ref([]);
+const selectedFields = ref(['name', 'email', 'is_admin']);
 // creat new user dialog
 const isDialogVisible = ref(false);
 // delete user dialog
@@ -82,11 +86,31 @@ const newUser = reactive({
   password: 'abc123' // default password
 });
 
+const columnLabelMap: Record<string, string> = {
+  name: 'Name',
+  email: 'Email',
+  is_admin: 'User Role',
+}
+
+const getColumnLabel = (field: string): string => {
+  return columnLabelMap[field] || field;
+}
+
+// Reflect is_admin to role
+const getFieldFormatter = (field: string) => {
+  return (row: any) => {
+    if (field === 'is_admin') {
+      return row.is_admin ? 'Admin' : 'Not Admin';
+    }
+    return row[field];
+  };
+}
+
 const formRef = ref<any>(null);
 
 const showCreatUserDialog = () => {
   isDialogVisible.value = true;
-  console.log("Dialog visibility:", isDialogVisible.value);
+  console.log("Creat new user dialog:", isDialogVisible.value);
 };
 
 // form reset
@@ -129,19 +153,18 @@ const creatUser = async () => {
 };
 
 // Delete user dialog
-const showDeletButtonCondition = (isAdmin: any) => {
+const showDeleteButtonCondition = (isAdmin: any) => {
   return isAdmin !== true;
-
 }
 const showDeleteDialog = (userId: any) => {
   userIdToDelete.value = userId;
   isDeleteDialogVisible.value = true;
+  console.log("Delete user with ID:", userId);
 }
 const confirmDelete = async () => {
   try {
     if (userIdToDelete.value !== null) {
       await axios.delete(`/api/users/${userIdToDelete.value}`);
-      // users.value = users.value.filter(user => (user as { id: number }).id !== userIdToDelete.value);
       await getUsers();
       isDeleteDialogVisible.value = false;
       userIdToDelete.value = null;
@@ -154,3 +177,11 @@ const resetDeleteDialog = () => {
   userIdToDelete.value = null;
 }
 </script>
+
+<style>
+.creatUserButton {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+</style>
