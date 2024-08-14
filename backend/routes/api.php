@@ -3,6 +3,7 @@
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerExportController;
 use App\Http\Controllers\CustomerImportController;
+use App\Http\Controllers\MasterRecordsController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\EnsureAdminRole;
 use Illuminate\Support\Facades\Route;
@@ -39,3 +40,8 @@ Route::put('/update/{id}', [CustomerController::class, 'update']);
 Route::get('/customers', [CustomerController::class, 'search']);
 Route::post('/import', [CustomerImportController::class, 'import']);
 Route::get('/export', [CustomerExportController::class, 'export']);
+
+// New table structure api
+Route::get('/records', [MasterRecordsController::class, 'index']);
+Route::post('/records_by_year_range', [MasterRecordsController::class, 'indexByYearRange']);
+
