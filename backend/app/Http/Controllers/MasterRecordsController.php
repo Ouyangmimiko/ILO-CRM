@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\MasterRecord;
 use Carbon\Carbon;
-use http\Exception\InvalidArgumentException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -33,6 +32,9 @@ class MasterRecordsController extends Controller
         ]);
         $startYear = $validatedData['academic_year_start'];
         $endYear = $validatedData['academic_year_end'];
+        if ($startYear >= $endYear) {
+            return response()->json(['error' => 'Start year must be less than end year'],400);
+        }
         $yearRange = $this->getAcademicYearRange($startYear, $endYear);
         $masterRecords = $this->getMasterRecordsByYearRange($yearRange);
         return response()->json([$masterRecords]);
@@ -128,12 +130,9 @@ class MasterRecordsController extends Controller
         $endDay = 30;
         $years = [];
 
-        if ($startYear > $endYear) {
-            throw new InvalidArgumentException("Start year must be less than or equal to end year.");
+        if ($startYear >= $endYear) {
+            throw new \Exception("Start year must be less than end year.");
         }
-//        else if ($startYear == $endYear-1) {
-//            return [$startYear . '-' . $endYear];
-//        }
 
         for ($year = $startYear; $year < $endYear; $year++) {
             $academicYearStart = Carbon::create($year, $startMonth, $startDay);
