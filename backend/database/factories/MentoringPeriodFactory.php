@@ -22,7 +22,7 @@ class MentoringPeriodFactory extends Factory
     {
         return [
             'master_record_id' => MasterRecord::factory()->create()->id,
-            'academic_year' => $this->faker->word,
+            'academic_year' => $this->faker->unique()->word,
             'mentoring_status' => $this->faker->randomElement(['yes', 'no']),
             'created_at' => now(),
             'updated_at' => now(),
@@ -32,11 +32,14 @@ class MentoringPeriodFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (MentoringPeriod $mentoringPeriod) {
-            $years = ['23/24', '24/25', '25/26', '22/23', '21/22'];
+            $years = ['2023-2024', '2024-2025', '2025-2026', '2022-2023', '2021-2022'];
             $usedYears = MentoringPeriod::where('master_record_id', $mentoringPeriod->master_record_id)
                 ->pluck('academic_year')
                 ->toArray();
             $availableYears = array_diff($years, $usedYears);
+//            echo '<pre>';
+//            print_r($availableYears);
+//            echo '</pre>';
             $mentoringPeriod->update([
                 'academic_year' => $this->faker->randomElement($availableYears),
             ]);

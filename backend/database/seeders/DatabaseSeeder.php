@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
 //            }
 //        });
         MasterRecord::factory()
-            ->count(4)
+            ->count(1)
             ->has(MentoringPeriod::factory()->count(4))
             ->has(IndustryYear::factory()->count(4))
             ->hasOtherEngagement()

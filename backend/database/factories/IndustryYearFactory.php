@@ -23,7 +23,7 @@ class IndustryYearFactory extends Factory
     {
         return [
             'master_record_id' => null, // Placeholder
-            'academic_year' => $this->faker->word, // Placeholder
+            'academic_year' => $this->faker->unique()->word, // Placeholder
             'had_placement_status' => $this->faker->randomElement(['yes', 'no']),
             'created_at' => now(),
             'updated_at' => now(),
@@ -33,7 +33,7 @@ class IndustryYearFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (IndustryYear $industryYear) {
-            $years = ['23/24', '24/25', '25/26', '22/23', '21/22'];
+            $years = ['2023-2024', '2024-2025', '2025-2026', '2022-2023', '2021-2022'];
             $usedYears = IndustryYear::where('master_record_id', $industryYear->master_record_id)
                 ->pluck('academic_year')
                 ->toArray();
