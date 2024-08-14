@@ -138,30 +138,7 @@
         class-name="table-column"
       />
 
-      <el-table-column
-        v-for="(year, index) in dynamicYears"
-        :key="index"
-        :prop="`mentoring_${year}`"
-        :label="`Mentoring ${year.replace('_', '/')}`"
-        width="150"
-        class-name="table-column"
-      />
-      <el-table-column
-        v-for="(year, index) in dynamicYears"
-        :key="index + dynamicYears.length"
-        :prop="`yii_${year}`"
-        :label="`YII ${year.replace('_', '/')}`"
-        width="150"
-        class-name="table-column"
-      />
-      <el-table-column
-        v-for="(year, index) in dynamicYears"
-        :key="index + dynamicYears.length * 2"
-        :prop="`projects_${year}`"
-        :label="`Projects ${year.replace('_', '/')}`"
-        width="150"
-        class-name="table-column"
-      />
+
       <el-table-column
         prop="info_related_to_contacting_the_partner"
         label="Contact Info"
