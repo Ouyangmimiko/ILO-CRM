@@ -10,13 +10,6 @@ class OtherEngagement extends Model
 {
     use HasFactory;
 
-//    protected $fillable = [
-//        'society_engaged_or_to_engage',
-//        'engagement_type',
-//        'engagement_happened',
-//        'notes'
-//    ];
-
     protected $table = 'other_engagement';
 
     public function masterRecord(): BelongsTo

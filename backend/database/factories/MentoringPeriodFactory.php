@@ -21,7 +21,7 @@ class MentoringPeriodFactory extends Factory
     public function definition(): array
     {
         return [
-            'master_record_id' => MasterRecord::factory()->create()->id,
+            'master_record_id' => null,
             'academic_year' => $this->faker->unique()->word,
             'mentoring_status' => $this->faker->randomElement(['yes', 'no']),
             'created_at' => now(),

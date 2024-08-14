@@ -11,13 +11,8 @@ class IndustryYear extends Model
     use HasFactory;
 
     protected $table = 'industry_years';
-//    protected $fillable = [
-//        'master_id',
-//        'academic_year',
-//        'had_placement_status',
-//    ];
 
-public function masterRecords(): BelongsTo
+public function masterRecord(): BelongsTo
 {
     return $this->belongsTo(MasterRecord::class, 'master_record_id');
 }

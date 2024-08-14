@@ -34,15 +34,5 @@ class DatabaseSeeder extends Seeder
             ->has(IndustryYear::factory()->count(4))
             ->hasOtherEngagement()
             ->create();
-//        $masterRecords = MasterRecord::factory()
-//            ->count(5)
-//            ->create();
-//        foreach ($masterRecords as $masterRecord) {
-//            for ($i = 0; $i < 4; $i++) {
-////                MentoringPeriod::factory()->create();
-//                IndustryYear::factory()->create(['master_record_id' => $masterRecord->id]);
-//            }
-//        }
-
     }
 }
