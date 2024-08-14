@@ -83,9 +83,9 @@ jobs:
           php artisan key:generate
 
           # Run database migrations and seeders
-          php artisan migrate --force
+          # php artisan migrate --force
           # php artisan db:seed --force
-          php artisan db:seed --class=UserSeeder
+          # php artisan db:seed --class=UserSeeder
 
           # Clear and cache configuration, routes, and views
           php artisan config:cache
