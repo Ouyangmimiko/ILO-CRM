@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('other_engagement', function (Blueprint $table) {
             $table->id();
-            $table->uuid('master_id');
-            $table->foreign('master_id')
+            $table->uuid('master_record_id');
+            $table->foreign('master_record_id')
                 ->references('id')
                 ->on('master_records')
                 ->onDelete('cascade')
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('society_engaged_or_to_engage')->nullable();
             $table->string('engagement_type')->nullable();
             $table->string('engagement_happened')->nullable();
-            $table->string('notes')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }
@@ -33,6 +33,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('other_engagement', function (Blueprint $table) {
+            $table->dropForeign(['master_record_id']);
+        });
         Schema::dropIfExists('other_engagement');
     }
 };

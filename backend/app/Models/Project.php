@@ -12,13 +12,13 @@ class Project extends Model
 
     protected $table = 'projects';
 
-    protected $fillable = [
-        'academic_year',
-        'project_client'
-    ];
+//    protected $fillable = [
+//        'academic_year',
+//        'project_client'
+//    ];
 
     public function masterRecord(): BelongsTo
     {
-        return $this->belongsTo(MasterRecord::class);
+        return $this->belongsTo(MasterRecord::class,'master_record_id');
     }
 }

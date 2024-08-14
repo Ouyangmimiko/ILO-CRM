@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('years_in_industry', function (Blueprint $table) {
+        Schema::create('industry_years', function (Blueprint $table) {
             $table->id();
-            $table->uuid('master_id');
-            $table->foreign('master_id')
+            $table->uuid('master_record_id');
+            $table->foreign('master_record_id')
                 ->references('id')
                 ->on('master_records')
                 ->onDelete('cascade')
@@ -23,6 +23,9 @@ return new class extends Migration
             $table->string('academic_year');
             $table->enum('had_placement_status', ['yes', 'no'])->nullable();
             $table->timestamps();
+
+            // make sure foreign_key-year  unique
+            $table->unique(['master_record_id', 'academic_year']);
         });
     }
 
@@ -31,6 +34,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('year_in_industry');
+        Schema::table('industry_years', function (Blueprint $table) {
+            $table->dropForeign(['master_record_id']);
+        });
+        Schema::dropIfExists('industry_years');
     }
 };
