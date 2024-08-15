@@ -41,9 +41,9 @@ class MasterRecord extends Model
         return $this->hasMany(IndustryYear::class);
     }
 
-    public function projects(): HasOne
+    public function projectYears(): HasMany
     {
-        return $this->hasOne(Project::class);
+        return $this->hasMany(ProjectYear::class);
     }
 
     public function otherEngagement(): HasOne
