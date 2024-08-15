@@ -43,7 +43,8 @@ Route::get('/export', [CustomerExportController::class, 'export']);
 
 // New table structure api
 Route::get('/records', [MasterRecordsController::class, 'index']);
-Route::post('/records_by_year_range', [MasterRecordsController::class, 'indexByYearRange']);
+Route::get('/records_by_year_range', [MasterRecordsController::class, 'indexByYearRange']);
 Route::post('/records/add', [MasterRecordsController::class, 'store']);
 Route::delete('/records/{id}', [MasterRecordsController::class, 'destroy']);
 Route::put('/records/{id}', [MasterRecordsController::class, 'update']);
+Route::get('/records/search', [MasterRecordsController::class, 'search']);
