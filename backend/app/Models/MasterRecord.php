@@ -14,10 +14,12 @@ class MasterRecord extends Model
     protected $table = 'master_records';
 
     // Using UUID as primary key
+    protected $primaryKey = 'id';
     protected $keyType = 'string';
     public $incrementing = false;
 
     protected $fillable = [
+        'id',
         'organisation',
         'organisation_sector',
         'first_name',
