@@ -182,6 +182,25 @@ class MasterRecordsController extends Controller
 //        return response()->json(['message' => 'Record created successfully', 'data' => $masterRecord], 201);
     }
 
+    public function destroy($id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $masterRecord = MasterRecord::findOrFail($id);
+
+            $masterRecord->delete();
+
+            DB::commit();
+
+            return response()->json(['message' => 'Delete successfully'], );
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json(['error' => 'Delete record failed'], );
+        }
+    }
+
     public function getMasterRecordsByYearRange(array $yearRange)
     {
         if (empty($yearRange)) {
