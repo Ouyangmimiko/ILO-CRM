@@ -12,6 +12,11 @@ class MentoringPeriod extends Model
 
     protected $table = 'mentoring_periods';
 
+    protected $fillable = [
+        'academic_year',
+        'mentoring_status'
+    ];
+
     public function masterRecord(): BelongsTo
     {
         return $this->belongsTo(MasterRecord::class, 'master_record_id');

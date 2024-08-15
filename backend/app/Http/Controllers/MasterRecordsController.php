@@ -7,6 +7,8 @@ use App\Models\MasterRecord;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class MasterRecordsController extends Controller
 {
@@ -38,6 +40,146 @@ class MasterRecordsController extends Controller
         $yearRange = $this->getAcademicYearRange($startYear, $endYear);
         $masterRecords = $this->getMasterRecordsByYearRange($yearRange);
         return response()->json([$masterRecords]);
+    }
+
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'organisation' => ['required', 'string', 'max:255'],
+            'organisation_sector' =>  ['nullable', 'string', 'max:255','regex:/^[\pL\s\-]+$/u'],
+            'first_name' =>  ['required', 'string', 'max:255','regex:/^[\pL\s\-]+$/u'],
+            'surname' =>  ['required', 'string', 'max:255','regex:/^[\pL\s\-]+$/u'],
+            'job_title' => 'nullable|string|max:255',
+            'email' => ['required','email', 'unique:master_records,email'],
+            'location' => 'nullable|string|max:255',
+            'uob_alumni' => 'nullable|string|regex:/^(yes|no)$/',
+            'programme_of_study_engaged' => 'string|max:255',
+
+            // mentoring periods
+            'mentoring_periods' => 'nullable|array',
+            'mentoring_periods.*.academic_year' =>  ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
+            'mentoring_periods.*.status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
+
+            // industry years
+            'industry_years' => 'nullable|array',
+            'industry_years.*.academic_year' => ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
+            'industry_years.*.had_placement_status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
+
+            // projects
+            'projects' => 'array',
+            'projects.*.academic_year' => ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
+            'projects.*.project_client' => 'required|string|max:255',
+
+            // other engagement
+            'other_engagement' => 'nullable|array',
+            'other_engagement.society_engaged_or_to_engage' => 'nullable|string|max:255',
+            'other_engagement.engagement_type' => 'nullable|string|max:255',
+            'other_engagement.engagement_happened' => 'nullable|string|max:255',
+            'other_engagement.notes' => 'nullable|text',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $masterRecord = MasterRecord::create([
+                'id' => (string) Str::uuid(),
+                'organisation' => $validatedData['organisation'],
+                'organisation_sector' => $validatedData['organisation_sector'] ?? null,
+                'first_name' => $validatedData['first_name'],
+                'surname' => $validatedData['surname'],
+                'job_title' => $validatedData['job_title'] ?? null,
+                'email' => $validatedData['email'],
+                'location' => $validatedData['location'] ?? null,
+                'uob_alumni' => $validatedData['uob_alumni'] ?? null,
+                'programme_of_study_engaged' => $validatedData['programme_of_study_engaged'] ?? null,
+            ]);
+
+            if (!empty($validatedData['mentoring_periods'])) {
+                foreach ($validatedData['mentoring_periods'] as $mentoringPeriod) {
+                    $masterRecord->mentoringPeriods()->create([
+                        'academic_year' => $mentoringPeriod['academic_year'],
+                        'mentoring_status' => $mentoringPeriod['status'],
+                    ]);
+                }
+            }
+
+            if (!empty($validatedData['industry_years'])) {
+                foreach ($validatedData['industry_years'] as $industryYear) {
+                    $masterRecord->industryYears()->create([
+                        'academic_year' => $industryYear['academic_year'],
+                        'had_placement_status' => $industryYear['had_placement_status'],
+                    ]);
+                }
+            }
+
+            if (!empty($validatedData['projects'])) {
+                foreach ($validatedData['projects'] as $project) {
+                    $masterRecord->projects()->create([
+                        'academic_year' => $project['academic_year'],
+                        'project_client' => $project['project_client'],
+                    ]);
+                }
+            }
+
+            if (!empty($validatedData['other_engagement'])) {
+                $masterRecord->otherEngagement()->create($validatedData['other_engagement']);
+            }
+
+            DB::commit();
+
+            return response()->json(['message' => 'Record created successfully.','data' => $masterRecord], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json(['error' => 'Failed to create record.'], 500);
+        }
+
+//        $masterRecord = MasterRecord::create([
+//            'id' => (string) Str::uuid(),
+//            'organisation' => $validatedData['organisation'],
+//            'organisation_sector' => $validatedData['organisation_sector'] ?? null,
+//            'first_name' => $validatedData['first_name'],
+//            'surname' => $validatedData['surname'],
+//            'job_title' => $validatedData['job_title'] ?? null,
+//            'email' => $validatedData['email'],
+//            'location' => $validatedData['location'] ?? null,
+//            'uob_alumni' => $validatedData['uob_alumni'] ?? null,
+//            'programme_of_study_engaged' => $validatedData['programme_of_study_engaged'] ?? null,
+//        ]);
+//
+//        if (!empty($validatedData['mentoring_periods'])) {
+//            foreach ($validatedData['mentoring_periods'] as $mentoringPeriod) {
+//                $masterRecord->mentoringPeriods()->create([
+//                    'academic_year' => $mentoringPeriod['academic_year'],
+//                    'mentoring_status' => $mentoringPeriod['status'],
+//                ]);
+//            }
+//        }
+//
+//        if (!empty($validatedData['industry_years'])) {
+//            foreach ($validatedData['industry_years'] as $industryYear) {
+//                $masterRecord->industryYears()->create([
+//                    'academic_year' => $industryYear['academic_year'],
+//                    'had_placement_status' => $industryYear['had_placement_status'],
+//                ]);
+//            }
+//        }
+//
+//        if (!empty($validatedData['projects'])) {
+//            foreach ($validatedData['projects'] as $project) {
+//                $masterRecord->projects()->create([
+//                    'academic_year' => $project['academic_year'],
+//                    'project_client' => $project['project_client'],
+//                ]);
+//            }
+//        }
+//
+//        if (!empty($validatedData['other_engagement'])) {
+//            $masterRecord->otherEngagement()->create($validatedData['other_engagement']);
+//        }
+//
+//        return response()->json(['message' => 'Record created successfully', 'data' => $masterRecord], 201);
     }
 
     public function getMasterRecordsByYearRange(array $yearRange)
