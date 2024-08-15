@@ -46,7 +46,7 @@ class MasterRecordsController extends Controller
     {
         $validatedData = $request->validate([
             'organisation' => ['required', 'string', 'max:255'],
-            'organisation_sector' =>  ['nullable', 'string', 'max:255','regex:/^[\pL\s\-]+$/u'],
+            'organisation_sector' =>  ['nullable', 'string', 'max:255'],
             'first_name' =>  ['required', 'string', 'max:255','regex:/^[\pL\s\-]+$/u'],
             'surname' =>  ['required', 'string', 'max:255','regex:/^[\pL\s\-]+$/u'],
             'job_title' => 'nullable|string|max:255',
@@ -198,6 +198,132 @@ class MasterRecordsController extends Controller
             DB::rollBack();
 
             return response()->json(['error' => 'Delete record failed'], );
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $masterRecord = MasterRecord::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'organisation' => 'required|string|max:255',
+            'organisation_sector' => 'nullable|string|max:255',
+            'first_name' =>  ['required', 'string', 'max:255','regex:/^[\pL\s\-]+$/u'],
+            'surname' =>  ['required', 'string', 'max:255','regex:/^[\pL\s\-]+$/u'],
+            'job_title' => 'nullable|string|max:255',
+            'email' => ['required','email', 'unique:master_records,email,' . $id],
+            'location' => 'nullable|string|max:255',
+            'uob_alumni' => 'nullable|string|regex:/^(yes|no)$/',
+            'programme_of_study_engaged' => 'string|max:255',
+
+            // mentoring periods
+            'mentoring_periods' => 'nullable|array',
+            'mentoring_periods.*.academic_year' =>  ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
+            'mentoring_periods.*.status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
+
+            // industry years
+            'industry_years' => 'nullable|array',
+            'industry_years.*.academic_year' => ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
+            'industry_years.*.had_placement_status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
+
+            // projects
+            'projects' => 'array',
+            'projects.*.academic_year' => ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
+            'projects.*.project_client' => 'required|string|max:255',
+
+            // other engagement
+            'other_engagement' => 'nullable|array',
+            'other_engagement.society_engaged_or_to_engage' => 'nullable|string|max:255',
+            'other_engagement.engagement_type' => 'nullable|string|max:255',
+            'other_engagement.engagement_happened' => 'nullable|string|max:255',
+            'other_engagement.notes' => 'nullable|text',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // update master records
+            $masterRecord->update([
+                'organisation' => $validatedData['organisation'],
+                'organisation_sector' => $validatedData['organisation_sector'] ?? null,
+                'first_name' => $validatedData['first_name'],
+                'surname' => $validatedData['surname'],
+                'job_title' => $validatedData['job_title'] ?? null,
+                'email' => $validatedData['email'],
+                'location' => $validatedData['location'] ?? null,
+                'uob_alumni' => $validatedData['uob_alumni'] ?? null,
+                'programme_of_study_engaged' => $validatedData['programme_of_study_engaged'] ?? null,
+            ]);
+
+            // update relative table
+            if (!empty($validatedData['mentoring_periods'])) {
+                foreach ($validatedData['mentoring_periods'] as $mentoringPeriod) {
+                    // check if exist
+                    $existingRecord = $masterRecord->mentoringPeriods()
+                        ->where('academic_year', $mentoringPeriod['academic_year'])
+                        ->first();
+                    if ($existingRecord) {
+                        // if exist
+                        $existingRecord->update([
+                            'mentoring_status' => $mentoringPeriod['status'],
+                        ]);
+                    } else {
+                        // creat new records
+                        $masterRecord->mentoringPeriods()->create([
+                            'academic_year' => $mentoringPeriod['academic_year'],
+                            'mentoring_status' => $mentoringPeriod['status'],
+                        ]);
+                    }
+                }
+            }
+
+            if (!empty($validatedData['industry_years'])) {
+                foreach ($validatedData['industry_years'] as $industryYear) {
+                    $existingRecord = $masterRecord->industryYears()
+                        ->where('academic_year', $industryYear['academic_year'])
+                        ->first();
+                    if ($existingRecord) {
+                        $existingRecord->update([
+                            'had_placement_status' => $industryYear['had_placement_status'],
+                        ]);
+                    } else {
+                        $masterRecord->industryYears()->create([
+                            'academic_year' => $industryYear['academic_year'],
+                            'had_placement_status' => $industryYear['had_placement_status'],
+                        ]);
+                    }
+                }
+            }
+            if (!empty($validatedData['projects'])) {
+                foreach ($validatedData['projects'] as $project) {
+                    $existingRecord = $masterRecord->projects()
+                        ->where('academic_year', $project['academic_year'])
+                        ->first();
+                    if ($existingRecord) {
+                        $existingRecord->update([
+                            'project_client' => $project['project_client'],
+                        ]);
+                    } else {
+                        $masterRecord->projects()->create([
+                            'academic_year' => $project['academic_year'],
+                            'project_client' => $project['project_client'],
+                        ]);
+                    }
+                }
+            }
+            if (!empty($validatedData['other_engagement'])) {
+                $masterRecord->otherEngagement()->delete(); // delete old record
+                $masterRecord->otherEngagement()->create($validatedData['other_engagement']);
+            }
+
+            DB::commit();
+
+            $updatedRecord = MasterRecord::findOrFail($id)->load(['mentoringPeriods', 'industryYears', 'projects', 'otherEngagement']);
+
+            return response()->json(['message' => 'Update success', 'data' => $updatedRecord]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
