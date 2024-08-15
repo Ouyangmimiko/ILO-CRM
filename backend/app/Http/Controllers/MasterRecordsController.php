@@ -39,7 +39,7 @@ class MasterRecordsController extends Controller
         }
         $yearRange = $this->getAcademicYearRange($startYear, $endYear);
         $masterRecords = $this->getMasterRecordsByYearRange($yearRange);
-        return response()->json([$masterRecords]);
+        return response()->json(['data' => $masterRecords, 'year_range' => $yearRange]);
     }
 
     public function store(Request $request)
@@ -65,10 +65,10 @@ class MasterRecordsController extends Controller
             'industry_years.*.academic_year' => ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
             'industry_years.*.had_placement_status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
 
-            // projects
-            'projects' => 'array',
-            'projects.*.academic_year' => ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
-            'projects.*.project_client' => 'required|string|max:255',
+            // project years
+            'project_years' => 'array',
+            'project_years.*.academic_year' => ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
+            'project_years.*.project_client' => 'required|string|max:255',
 
             // other engagement
             'other_engagement' => 'nullable|array',
@@ -112,11 +112,11 @@ class MasterRecordsController extends Controller
                 }
             }
 
-            if (!empty($validatedData['projects'])) {
-                foreach ($validatedData['projects'] as $project) {
-                    $masterRecord->projects()->create([
-                        'academic_year' => $project['academic_year'],
-                        'project_client' => $project['project_client'],
+            if (!empty($validatedData['project_years'])) {
+                foreach ($validatedData['project_years'] as $projectYear) {
+                    $masterRecord->projectYears()->create([
+                        'academic_year' => $projectYear['academic_year'],
+                        'project_client' => $projectYear['project_client'],
                     ]);
                 }
             }
@@ -134,52 +134,6 @@ class MasterRecordsController extends Controller
 
             return response()->json(['error' => 'Failed to create record.'], 500);
         }
-
-//        $masterRecord = MasterRecord::create([
-//            'id' => (string) Str::uuid(),
-//            'organisation' => $validatedData['organisation'],
-//            'organisation_sector' => $validatedData['organisation_sector'] ?? null,
-//            'first_name' => $validatedData['first_name'],
-//            'surname' => $validatedData['surname'],
-//            'job_title' => $validatedData['job_title'] ?? null,
-//            'email' => $validatedData['email'],
-//            'location' => $validatedData['location'] ?? null,
-//            'uob_alumni' => $validatedData['uob_alumni'] ?? null,
-//            'programme_of_study_engaged' => $validatedData['programme_of_study_engaged'] ?? null,
-//        ]);
-//
-//        if (!empty($validatedData['mentoring_periods'])) {
-//            foreach ($validatedData['mentoring_periods'] as $mentoringPeriod) {
-//                $masterRecord->mentoringPeriods()->create([
-//                    'academic_year' => $mentoringPeriod['academic_year'],
-//                    'mentoring_status' => $mentoringPeriod['status'],
-//                ]);
-//            }
-//        }
-//
-//        if (!empty($validatedData['industry_years'])) {
-//            foreach ($validatedData['industry_years'] as $industryYear) {
-//                $masterRecord->industryYears()->create([
-//                    'academic_year' => $industryYear['academic_year'],
-//                    'had_placement_status' => $industryYear['had_placement_status'],
-//                ]);
-//            }
-//        }
-//
-//        if (!empty($validatedData['projects'])) {
-//            foreach ($validatedData['projects'] as $project) {
-//                $masterRecord->projects()->create([
-//                    'academic_year' => $project['academic_year'],
-//                    'project_client' => $project['project_client'],
-//                ]);
-//            }
-//        }
-//
-//        if (!empty($validatedData['other_engagement'])) {
-//            $masterRecord->otherEngagement()->create($validatedData['other_engagement']);
-//        }
-//
-//        return response()->json(['message' => 'Record created successfully', 'data' => $masterRecord], 201);
     }
 
     public function destroy($id)
@@ -226,10 +180,10 @@ class MasterRecordsController extends Controller
             'industry_years.*.academic_year' => ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
             'industry_years.*.had_placement_status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
 
-            // projects
-            'projects' => 'array',
-            'projects.*.academic_year' => ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
-            'projects.*.project_client' => 'required|string|max:255',
+            // project years
+            'project_years' => 'array',
+            'project_years.*.academic_year' => ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
+            'project_years.*.project_client' => 'required|string|max:255',
 
             // other engagement
             'other_engagement' => 'nullable|array',
@@ -294,19 +248,19 @@ class MasterRecordsController extends Controller
                     }
                 }
             }
-            if (!empty($validatedData['projects'])) {
-                foreach ($validatedData['projects'] as $project) {
-                    $existingRecord = $masterRecord->projects()
-                        ->where('academic_year', $project['academic_year'])
+            if (!empty($validatedData['project_years'])) {
+                foreach ($validatedData['project_years'] as $projectYear) {
+                    $existingRecord = $masterRecord->projectYears()
+                        ->where('academic_year', $projectYear['academic_year'])
                         ->first();
                     if ($existingRecord) {
                         $existingRecord->update([
-                            'project_client' => $project['project_client'],
+                            'project_client' => $projectYear['project_client'],
                         ]);
                     } else {
-                        $masterRecord->projects()->create([
-                            'academic_year' => $project['academic_year'],
-                            'project_client' => $project['project_client'],
+                        $masterRecord->projectYears()->create([
+                            'academic_year' => $projectYear['academic_year'],
+                            'project_client' => $projectYear['project_client'],
                         ]);
                     }
                 }
@@ -318,13 +272,18 @@ class MasterRecordsController extends Controller
 
             DB::commit();
 
-            $updatedRecord = MasterRecord::findOrFail($id)->load(['mentoringPeriods', 'industryYears', 'projects', 'otherEngagement']);
+            $updatedRecord = MasterRecord::findOrFail($id)->load(['mentoringPeriods', 'industryYears', 'projectYears', 'otherEngagement']);
 
             return response()->json(['message' => 'Update success', 'data' => $updatedRecord]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => $e->getMessage()], 500);
         }
+    }
+
+    public function search(Request $request)
+    {
+
     }
 
     public function getMasterRecordsByYearRange(array $yearRange)
@@ -339,11 +298,12 @@ class MasterRecordsController extends Controller
             'industryYears' => function ($query) use ($yearRange) {
                 $query->whereIn('academic_year', $yearRange);
             },
-            'projects' => function ($query) use ($yearRange) {
+            'projectYears' => function ($query) use ($yearRange) {
                 $query->whereIn('academic_year', $yearRange);
             },
             'otherEngagement'
         ])->get();
+        
         $formattedMasterRecords = $masterRecords->map(function ($record) {
             return [
                 'id' => $record->id,
@@ -368,18 +328,18 @@ class MasterRecordsController extends Controller
                         'had_placement_status' => $industryYear->had_placement_status,
                     ];
                 }) : [],
-                'projects' => $record->projects ? $record->projects->map(function ($project) {
+                'project_years' => $record->projectYears ? $record->projectYears->map(function ($projectYear) {
                     return [
-                        'year' => $project->academic_year,
-                        'project_client' => $project->project_client,
+                        'year' => $projectYear->academic_year,
+                        'project_client' => $projectYear->project_client,
                     ];
                 }) : [],
-                'other_engagement' => [
-                    'society_engaged_or_to_engage' => $record->otherEngagement->society_engaged_or_to_engage,
-                    'engagement_type' => $record->otherEngagement->engagement_type,
-                    'engagement_happened' => $record->otherEngagement->engagement_happened,
-                    'notes' => $record->otherEngagement->notes,
-                ]
+                'other_engagement' => $record->otherEngagement ? [
+                    'society_engaged_or_to_engage' => $record->otherEngagement->society_engaged_or_to_engage ?? null,
+                    'engagement_type' => $record->otherEngagement->engagement_type ?? null,
+                    'engagement_happened' => $record->otherEngagement->engagement_happened ?? null,
+                    'notes' => $record->otherEngagement->notes ?? null,
+                ] : [],
             ];
         });
         return $formattedMasterRecords;
@@ -417,9 +377,6 @@ class MasterRecordsController extends Controller
         $endDay = 30;
         $years = [];
 
-        if ($startYear >= $endYear) {
-            throw new \Exception("Start year must be less than end year.");
-        }
 
         for ($year = $startYear; $year < $endYear; $year++) {
             $academicYearStart = Carbon::create($year, $startMonth, $startDay);

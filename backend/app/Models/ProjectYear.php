@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Project extends Model
+class ProjectYear extends Model
 {
     use HasFactory;
 
-    protected $table = 'projects';
+    protected $table = 'project_years';
 
     protected $fillable = [
         'academic_year',
