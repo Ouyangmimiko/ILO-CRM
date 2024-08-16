@@ -59,7 +59,7 @@
       <el-select
           v-model="selectedStartYear"
           placeholder="Start Year"
-          :style="{ width: '150px' }"
+          :style="{ width: '5em' }"
           @change="handleStartYear"
       >
         <el-option
@@ -73,7 +73,7 @@
       <el-select
           v-model="selectedEndYear"
           placeholder="End Year"
-          :style="{ width: '150px' }"
+          :style="{ width: '5em' }"
           @change="handleEndYear"
       >
         <el-option
@@ -539,6 +539,7 @@ const getMasterRecords = async () => {
     yearRange.value = response.data.year_range;
     masterRecords.value = formatRecords(records, yearRange.value);
     tableHeaders.value = getTableHeaders(yearRange.value);
+    console.log(records);
     console.log(masterRecords.value);
     console.log(tableHeaders.value);
   } catch (error) {

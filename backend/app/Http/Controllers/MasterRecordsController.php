@@ -484,7 +484,7 @@ class MasterRecordsController extends Controller
                 }) : [],
                 'project_years' => $record->projectYears ? $record->projectYears->map(function ($projectYear) {
                     return [
-                        'year' => $projectYear->academic_year,
+                        'academic_year' => $projectYear->academic_year,
                         'project_client' => $projectYear->project_client,
                     ];
                 }) : [],
@@ -556,7 +556,7 @@ class MasterRecordsController extends Controller
                 }) : [],
                 'project_years' => $record->projectYears ? $record->projectYears->map(function ($projectYear) {
                     return [
-                        'year' => $projectYear->academic_year,
+                        'academic_year' => $projectYear->academic_year,
                         'project_client' => $projectYear->project_client,
                     ];
                 }) : [],
