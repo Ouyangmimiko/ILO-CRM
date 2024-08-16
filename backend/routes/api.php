@@ -47,4 +47,4 @@ Route::get('/records_by_year_range', [MasterRecordsController::class, 'indexByYe
 Route::post('/records/add', [MasterRecordsController::class, 'store']);
 Route::delete('/records/{id}', [MasterRecordsController::class, 'destroy']);
 Route::put('/records/{id}', [MasterRecordsController::class, 'update']);
-Route::get('/records/search', [MasterRecordsController::class, 'search']);
+Route::get('/records/search/{searchType}', [MasterRecordsController::class, 'search']);
