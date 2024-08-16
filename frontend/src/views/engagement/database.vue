@@ -54,7 +54,37 @@
         <el-button @click="handleReset">Reset</el-button>
       </el-form-item>
     </el-form>
+    <!-- Year Selector-->
+    <div class="YearSelector">
+      <el-select
+          v-model="selectedStartYear"
+          placeholder="Start Year"
+          :style="{ width: '150px' }"
+          @change="handleStartYear"
+      >
+        <el-option
+            v-for="year in StartYearOptions"
+            :key="year"
+            :label="year"
+            :value="year"
+        />
+       </el-select>
+      <span > to </span>
+      <el-select
+          v-model="selectedEndYear"
+          placeholder="End Year"
+          :style="{ width: '150px' }"
+          @change="handleEndYear"
+      >
+        <el-option
+            v-for="year in EndYearOptions"
+            :key="year"
+            :label="year"
+            :value="year"
+        />
+      </el-select>
 
+    </div>
     <!-- More Function -->
     <div class="function-buttons">
       <el-button type="primary" @click="handleAdd">Add</el-button>
@@ -70,10 +100,25 @@
 
       <el-button @click="exportExcel">Export</el-button>
     </div>
-
     <!-- table -->
     <el-table
-      :data="data"
+        :data="masterRecords"
+        stripe
+        border
+        style="width: 100%"
+        max-height="500"
+        table-layout="fixed"
+        size="small"
+    >
+      <el-table-column
+        v-for="header in tableHeaders"
+        :key="header.prop"
+        :prop="header.prop"
+        :label="header.label"
+      ></el-table-column>
+    </el-table>
+    <el-table
+      :data="masterRecords"
       stripe
       border
       style="width: 100%"
@@ -354,6 +399,154 @@ import axios from "../../api/axios";
 import { ElForm, ElMessage, FormRules } from "element-plus";
 import { AxiosError } from "axios";
 
+const masterRecords = ref([]);
+const yearRange = ref([]);
+const tableHeaders = ref([]);
+
+// Year select
+const selectedStartYear = ref();
+const selectedEndYear = ref();
+const currentDate = new Date();
+const currentYear = new Date().getFullYear();
+const academicYearStartDate = new Date(currentYear,8, 1);
+const setDefaultDate = () => {
+  if (currentDate > academicYearStartDate) {
+    selectedStartYear.value = currentYear;
+  } else {
+    selectedStartYear.value = currentYear - 1;
+  }
+  selectedEndYear.value = selectedStartYear.value + 4;
+}
+onMounted(() => {
+  setDefaultDate();
+  getMasterRecords();
+});
+
+const generateYears = (startYear: number, endYear: number) => {
+  const years = [];
+  for (let year = startYear; year >= endYear; year--) {
+    years.push(year);
+  }
+  return years;
+};
+
+const StartYearOptions = computed(() => generateYears(selectedEndYear.value - 1, 2000));
+const EndYearOptions = computed(() => generateYears( selectedStartYear.value + 20, selectedStartYear.value + 1))
+const handleStartYear = () => {
+  if (selectedStartYear.value >= selectedEndYear.value) {
+    selectedEndYear.value = selectedStartYear.value + 1;
+  }
+  getMasterRecords();
+}
+
+const handleEndYear = () => {
+  getMasterRecords();
+}
+
+const formatRecords = (records: any, yearRange) => {
+  return records.map((record: any) => {
+    let formattedRecord = {
+      Id: record.id,
+      organisation: record.organisation,
+      organisation_sector: record.organisation_sector,
+      first_name: record.first_name,
+      surname: record.surname,
+      job_title: record.job_title,
+      email: record.email,
+      location: record.location,
+      uob_alumni: record.uob_alumni,
+      programme_of_study_engaged: record.programme_of_study_engaged,
+      ...Object.fromEntries(yearRange.map(year => [
+        `mentoring_${year}`, null,
+        `industry_${year}`, null,
+        `project_${year}`, null
+      ]))
+    };
+    // fill mentoring_periods
+    record.mentoring_periods.forEach(period => {
+      formattedRecord[`mentoring_${period.academic_year}`] = period.mentoring_status;
+    });
+
+    // fill industry_years
+    record.industry_years.forEach(industry => {
+      formattedRecord[`industry_${industry.academic_year}`] = industry.had_placement_status;
+    });
+
+    // fill project_years
+    record.project_years.forEach(project => {
+      formattedRecord[`project_${project.academic_year}`] = project.project_client;
+    });
+
+    // format other data
+    formattedRecord['other_engagement'] = record.other_engagement
+        ? {
+          society_engaged_or_to_engage: record.other_engagement.society_engaged_or_to_engage,
+          engagement_type: record.other_engagement.engagement_type,
+          engagement_happened: record.other_engagement.engagement_happened,
+          notes: record.other_engagement.notes,
+        }
+        : null;
+
+    return formattedRecord;
+  });
+}
+
+// Handle header generation
+const baseHeaders = [
+  {label: "Organisation", prop: "organisation"},
+  {label: "Organisation Sector", prop: "organisation_sector"},
+  {label: "First Name", prop: "first_name"},
+  {label: "Surname", prop: "surname"},
+  {label: "Job Title", prop: "job_title"},
+  {label: "Email Address", prop: "email"},
+  {label: "Location", prop: "location"},
+  {label: "UoB Alumni", prop: "uob_alumni"},
+  {label: "Programme of Study Engaged", prop: "programme_of_study_engaged"},
+];
+let dynamicHeaders = [];
+const getTableHeaders = (yearRange) => {
+  dynamicHeaders = [];
+  let dHeaders = [];
+  dHeaders = dHeaders.concat(
+      yearRange.flatMap(year => [
+        { label: `Mentoring ${year}`, prop: `mentoring_${year}` }
+      ])
+  );
+  dHeaders = dHeaders.concat(
+      yearRange.flatMap(year => [
+        { label: `Year in Industry ${year}`, prop: `industry_${year}` }
+      ])
+  );
+  dHeaders = dHeaders.concat(
+      yearRange.flatMap(year => [
+        { label: `Project Client ${year}`, prop: `project_${year}` }
+      ])
+  );
+  dynamicHeaders.push(dHeaders);
+  console.log(dynamicHeaders);
+  return [...baseHeaders, ...dHeaders];
+}
+
+const getMasterRecords = async () => {
+  try {
+    const response = await axios.get('/api//records_by_year_range', {
+      params: {
+        academic_year_start: selectedStartYear.value,
+        academic_year_end: selectedEndYear.value,
+      },
+    });
+    const records = response.data.data;
+    yearRange.value = response.data.year_range;
+    masterRecords.value = formatRecords(records, yearRange.value);
+    tableHeaders.value = getTableHeaders(yearRange.value);
+    console.log(masterRecords.value);
+    console.log(tableHeaders.value);
+  } catch (error) {
+    ElMessage.error("Error in getMasterRecords");
+  }
+}
+
+
 const queryForm = reactive({
   // search_all: true, // boolean for search_all
   search_type: "",
@@ -362,8 +555,8 @@ const queryForm = reactive({
 
 const dialogVisible = ref(false);
 // 获取当前年份
-const currentYear = new Date().getFullYear();
-const nextYear = currentYear + 1;
+// const currentYear = new Date().getFullYear();
+const nextYear = selectedStartYear.value + 1;
 
 const dynamicYears = computed(() => {
   return Array.from({ length: 4 }, (_, i) => {
@@ -395,20 +588,20 @@ const editForm: Record<string, any> = reactive({
   info_related_to_contacting_the_partner: "",
 });
 
-const yearLabel = `${currentYear}-${nextYear.toString().slice(-2)}`;
+const yearLabel = `${selectedStartYear.value}-${nextYear.toString().slice(-2)}`;
 
 const dynamicFields = computed(() => [
   {
     label: `Mentoring ${yearLabel}`,
-    key: `mentoring_${currentYear}_${nextYear}`,
+    key: `mentoring_${selectedStartYear.value}_${nextYear}`,
   },
   {
     label: `YII ${yearLabel}`,
-    key: `yii_${currentYear}_${nextYear}`,
+    key: `yii_${selectedStartYear.value}_${nextYear}`,
   },
   {
     label: `Projects ${yearLabel}`,
-    key: `projects_${currentYear}_${nextYear}`,
+    key: `projects_${selectedStartYear.value}_${nextYear}`,
   },
 ]);
 
