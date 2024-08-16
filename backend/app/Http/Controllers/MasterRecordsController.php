@@ -348,11 +348,10 @@ class MasterRecordsController extends Controller
             // Handle mentoring_periods relationship
             if (isset($requestData['mentoring_periods'])) {
                 $query->whereHas('mentoringPeriods', function ($q) use ($requestData) {
-                    if (isset($filter['academic_year'])) {
-                        $q->where('academic_year', $filter['academic_year']);
-                    }
-                    if (isset($filter['status'])) {
-                        $q->where('status', $filter['mentoring_status']);
+                    foreach ($requestData['mentoring_periods'] as $filter) {
+                        foreach ($filter as $column => $value) {
+                            $q->where($column, 'LIKE', "%{$value}%");
+                        }
                     }
                 });
             }
@@ -474,7 +473,7 @@ class MasterRecordsController extends Controller
                 'mentoring_periods' => $record->mentoringPeriods ? $record->mentoringPeriods->map(function ($mentoringPeriod) {
                     return [
                         'academic_year' => $mentoringPeriod->academic_year,
-                        'status' => $mentoringPeriod->mentoring_status,
+                        'mentoring_status' => $mentoringPeriod->mentoring_status,
                     ];
                 }) : [],
                 'industry_years' => $record->industryYears ? $record->industryYears->map(function ($industryYear) {
@@ -546,7 +545,7 @@ class MasterRecordsController extends Controller
                 'mentoring_periods' => $record->mentoringPeriods ? $record->mentoringPeriods->map(function ($mentoringPeriod) {
                     return [
                         'academic_year' => $mentoringPeriod->academic_year,
-                        'status' => $mentoringPeriod->mentoring_status,
+                        'mentoring_status' => $mentoringPeriod->mentoring_status,
                     ];
                 }) : [],
                 'industry_years' => $record->industryYears ? $record->industryYears->map(function ($industryYear) {
