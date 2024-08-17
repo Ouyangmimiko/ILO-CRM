@@ -1,59 +1,5 @@
 <template>
   <div class="container">
-    <!-- form -->
-    <el-form :model="queryForm" inline class="query-form">
-      <el-form-item label="Search Type">
-        <el-select
-          v-model="queryForm.search_type"
-          placeholder="Select search type"
-          class="form-select"
-        >
-          <el-option label="All" value="true" />
-          <el-option label="Organisation" value="organisation" />
-          <el-option label="Organisation Sector" value="organisation_sector" />
-          <el-option label="First Name" value="first_name" />
-          <el-option label="Surname" value="surname" />
-          <el-option label="Job Title" value="job_title" />
-          <el-option label="Email" value="email" />
-          <el-option label="Location" value="location" />
-          <el-option label="UoB Alumni" value="uob_alumni" />
-          <el-option
-            label="Programme of Study Engaged"
-            value="programme_of_study_engaged"
-          />
-          <el-option
-            v-for="(year, index) in dynamicYears"
-            :key="index"
-            :label="`Mentoring ${year.replace('_', '/')}`"
-            :value="`mentoring_${year}`"
-          />
-
-          <el-option
-            v-for="(year, index) in dynamicYears"
-            :key="index"
-            :label="`YII ${year.replace('_', '/')}`"
-            :value="`yii_${year}`"
-          />
-          <el-option
-            v-for="(year, index) in dynamicYears"
-            :key="index"
-            :label="`Projects ${year.replace('_', '/')}`"
-            :value="`projects_${year}`"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="Search Term">
-        <el-input
-          v-model="queryForm.search_term"
-          placeholder="Enter search term"
-          class="form-input"
-        />
-      </el-form-item>
-      <el-form-item class="form-actions">
-        <el-button type="primary" @click="handleQuery">Query</el-button>
-        <el-button @click="handleReset">Reset</el-button>
-      </el-form-item>
-    </el-form>
     <!-- Year Selector-->
     <div class="YearSelector">
       <el-select
@@ -85,7 +31,7 @@
       </el-select>
 
     </div>
-    <!-- More Function -->
+    <!-- Function Button -->
     <div class="function-buttons">
       <el-button type="primary" @click="handleAdd">Add</el-button>
       <el-upload
@@ -117,279 +63,6 @@
         :label="header.label"
       ></el-table-column>
     </el-table>
-    <el-table
-      :data="masterRecords"
-      stripe
-      border
-      style="width: 100%"
-      max-height="500"
-      table-layout="fixed"
-      size="small"
-    >
-      <!-- Table columns here -->
-      <el-table-column
-        fixed
-        prop="organisation"
-        label="Organisation"
-        width="150"
-        class-name="table-column"
-      />
-      <el-table-column
-        prop="organisation_sector"
-        label="Organisation Sector"
-        width="150"
-        class-name="table-column"
-      />
-      <el-table-column
-        prop="first_name"
-        label="First Name"
-        width="120"
-        class-name="table-column"
-      />
-      <el-table-column
-        prop="surname"
-        label="Surname"
-        width="120"
-        class-name="table-column"
-      />
-      <el-table-column
-        prop="job_title"
-        label="Job Title"
-        width="120"
-        class-name="table-column"
-      />
-      <el-table-column
-        prop="email"
-        label="Email"
-        width="180"
-        class-name="table-column"
-      />
-      <el-table-column
-        prop="location"
-        label="Location"
-        width="150"
-        class-name="table-column"
-      />
-      <el-table-column
-        prop="uob_alumni"
-        label="UoB Alumni"
-        width="120"
-        class-name="table-column"
-      />
-      <el-table-column
-        prop="programme_of_study_engaged"
-        label="Programme of Study Engaged"
-        width="250"
-        class-name="table-column"
-      />
-
-
-      <el-table-column
-        prop="info_related_to_contacting_the_partner"
-        label="Contact Info"
-        width="250"
-        class-name="table-column"
-      />
-      <el-table-column fixed="right" label="Operations" min-width="150">
-        <template #default="scope">
-          <div class="operation-buttons">
-            <div>
-              <el-button size="small" @click="handleEdit(scope.row)">
-                Edit
-              </el-button>
-            </div>
-            <div>
-              <el-button size="small" @click="showDetail(scope.row)">
-                Detail
-              </el-button>
-            </div>
-            <div>
-              <el-button
-                size="small"
-                type="danger"
-                @click="handleDelete(scope.row.id)"
-              >
-                Delete
-              </el-button>
-            </div>
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <!-- dialog for add/edit -->
-    <el-dialog
-      v-model="dialogVisible"
-      :title="editForm.id ? 'Edit Data' : 'Add Data'"
-      :before-close="handleClose"
-      width="900px"
-      class="styled-dialog"
-      :style="{ maxHeight: '80vh', overflow: 'auto' }"
-    >
-      <el-form
-        :model="editForm"
-        :rules="rules"
-        label-width="200px"
-        ref="formRef"
-        class="two-column-form"
-      >
-        <el-row :gutter="20">
-          <!-- 第一列 -->
-          <el-col :span="12">
-            <el-form-item label="ID" v-if="editForm.id">
-              <el-input v-model="editForm.id" disabled></el-input>
-            </el-form-item>
-            <el-form-item label="Organisation">
-              <el-input v-model="editForm.organisation"></el-input>
-            </el-form-item>
-            <el-form-item label="Organisation Sector">
-              <el-input v-model="editForm.organisation_sector"></el-input>
-            </el-form-item>
-            <el-form-item label="First Name">
-              <el-input v-model="editForm.first_name"></el-input>
-            </el-form-item>
-            <el-form-item label="Surname">
-              <el-input v-model="editForm.surname"></el-input>
-            </el-form-item>
-            <el-form-item label="Job Title">
-              <el-input v-model="editForm.job_title"></el-input>
-            </el-form-item>
-            <el-form-item label="Email" prop="email">
-              <el-input v-model="editForm.email" />
-            </el-form-item>
-            <el-form-item label="Location">
-              <el-input v-model="editForm.location"></el-input>
-            </el-form-item>
-            <el-form-item label="Info Related to Contacting the Partner">
-              <el-input
-                type="textarea"
-                v-model="editForm.info_related_to_contacting_the_partner"
-              ></el-input>
-            </el-form-item>
-          </el-col>
-          <!-- 第二列 -->
-          <el-col :span="12">
-            <el-form-item label="UOB Alumni">
-              <el-switch
-                v-model="editForm.uob_alumni"
-                :active-value="'yes'"
-                :inactive-value="'no'"
-                :active-text="'Yes'"
-                :inactive-text="'No'"
-              ></el-switch>
-            </el-form-item>
-            <!-- 动态生成 Mentoring、YII 和 Projects 字段 -->
-            <el-form-item
-              v-for="(field, index) in dynamicFields"
-              :key="index"
-              :label="field.label"
-            >
-              <el-switch
-                v-model="editForm[field.key]"
-                :active-value="'yes'"
-                :inactive-value="'no'"
-                :active-text="'Yes'"
-                :inactive-text="'No'"
-              ></el-switch>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-form-item>
-          <el-button type="primary" @click="handleConfirm">Confirm</el-button>
-          <el-button @click="handleClose">Cancel</el-button>
-        </el-form-item>
-      </el-form>
-    </el-dialog>
-
-    <!-- Detail 弹窗 -->
-    <el-dialog
-      v-model="detailDialogVisible"
-      :title="`Details for ${selectedRow.organisation}`"
-      :before-close="handleDialogClose"
-      width="800px"
-      class="styled-dialog"
-    >
-      <div class="dialog-content">
-        <!-- Static Info -->
-        <el-form
-          :model="selectedRow"
-          label-width="200px"
-          class="two-column-form"
-        >
-          <el-row :gutter="20">
-            <el-col :span="12">
-              <el-form-item label="Organisation:">
-                <span>{{ selectedRow?.organisation }}</span>
-              </el-form-item>
-              <el-form-item label="Organisation Sector:">
-                <span>{{ selectedRow?.organisation_sector }}</span>
-              </el-form-item>
-              <el-form-item label="First Name:">
-                <span>{{ selectedRow?.first_name }}</span>
-              </el-form-item>
-              <el-form-item label="Surname:">
-                <span>{{ selectedRow?.surname }}</span>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="Job Title:">
-                <span>{{ selectedRow?.job_title }}</span>
-              </el-form-item>
-              <el-form-item label="Email:">
-                <span>{{ selectedRow?.email }}</span>
-              </el-form-item>
-              <el-form-item label="Location:">
-                <span>{{ selectedRow?.location }}</span>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="24">
-              <el-form-item label="Contact Info:" class="contact-info-item">
-                <span>{{
-                  selectedRow?.info_related_to_contacting_the_partner
-                }}</span>
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form>
-
-        <!-- Dynamic Info -->
-        <div class="dynamic-table-container">
-          <el-table :data="dynamicData" align="center">
-            <el-table-column
-              prop="year"
-              label="Year"
-              width="150"
-              align="center"
-            />
-            <el-table-column
-              prop="mentoring"
-              label="Mentoring"
-              width="150"
-              align="center"
-            />
-            <el-table-column
-              prop="yii"
-              label="YII"
-              width="150"
-              align="center"
-            />
-            <el-table-column
-              prop="projects"
-              label="Projects"
-              width="150"
-              align="center"
-            />
-          </el-table>
-        </div>
-
-        <div style="text-align: right; margin-top: 20px">
-          <el-button @click="handleDialogClose">Close</el-button>
-        </div>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -399,9 +72,9 @@ import axios from "../../api/axios";
 import { ElForm, ElMessage, FormRules } from "element-plus";
 import { AxiosError } from "axios";
 
-const masterRecords = ref([]);
-const yearRange = ref([]);
-const tableHeaders = ref([]);
+const masterRecords = ref<any[]>([]);
+const yearRange = ref<any[]>([]);
+const tableHeaders = ref<any[]>([]);
 
 // Year select
 const selectedStartYear = ref();
@@ -443,7 +116,7 @@ const handleEndYear = () => {
   getMasterRecords();
 }
 
-const formatRecords = (records: any, yearRange) => {
+const formatRecords = (records: any, yearRange : any[]) => {
   return records.map((record: any) => {
     let formattedRecord = {
       Id: record.id,
@@ -463,17 +136,17 @@ const formatRecords = (records: any, yearRange) => {
       ]))
     };
     // fill mentoring_periods
-    record.mentoring_periods.forEach(period => {
+    record.mentoring_periods.forEach((period: any) => {
       formattedRecord[`mentoring_${period.academic_year}`] = period.mentoring_status;
     });
 
     // fill industry_years
-    record.industry_years.forEach(industry => {
+    record.industry_years.forEach((industry: any) => {
       formattedRecord[`industry_${industry.academic_year}`] = industry.had_placement_status;
     });
 
     // fill project_years
-    record.project_years.forEach(project => {
+    record.project_years.forEach((project: any) => {
       formattedRecord[`project_${project.academic_year}`] = project.project_client;
     });
 
@@ -504,22 +177,34 @@ const baseHeaders = [
   {label: "Programme of Study Engaged", prop: "programme_of_study_engaged"},
 ];
 let dynamicHeaders = [];
-const getTableHeaders = (yearRange) => {
+const getTableHeaders = (yearRange: any[]) => {
   dynamicHeaders = [];
-  let dHeaders = [];
+  let dHeaders = [] as any[];
   dHeaders = dHeaders.concat(
       yearRange.flatMap(year => [
-        { label: `Mentoring ${year}`, prop: `mentoring_${year}` }
+        {
+          label: `Mentoring ${year}`,
+          prop: `mentoring_${year}`,
+          ac_year: `${year}`
+        }
       ])
   );
   dHeaders = dHeaders.concat(
       yearRange.flatMap(year => [
-        { label: `Year in Industry ${year}`, prop: `industry_${year}` }
+        {
+          label: `Year in Industry ${year}`,
+          prop: `industry_${year}`,
+          ac_year: `${year}`
+        }
       ])
   );
   dHeaders = dHeaders.concat(
       yearRange.flatMap(year => [
-        { label: `Project Client ${year}`, prop: `project_${year}` }
+        {
+          label: `Project Client ${year}`,
+          prop: `project_${year}`,
+          ac_year: `${year}`
+        }
       ])
   );
   dynamicHeaders.push(dHeaders);
@@ -555,9 +240,6 @@ const queryForm = reactive({
 });
 
 const dialogVisible = ref(false);
-// 获取当前年份
-// const currentYear = new Date().getFullYear();
-const nextYear = selectedStartYear.value + 1;
 
 const dynamicYears = computed(() => {
   return Array.from({ length: 4 }, (_, i) => {
@@ -566,11 +248,6 @@ const dynamicYears = computed(() => {
     return `${startYear}_${endYear.toString().slice(-2)}`;
   });
 });
-
-// 动态生成字段名称
-const mentoringField = `mentoring_${currentYear}_${nextYear}`;
-const yiiField = `yii_${currentYear}_${nextYear}`;
-const projectsField = `projects_${currentYear}_${nextYear}`;
 
 const editForm: Record<string, any> = reactive({
   id: "", // 默认空值
@@ -583,28 +260,8 @@ const editForm: Record<string, any> = reactive({
   location: "",
   uob_alumni: "",
   programme_of_study_engaged: "",
-  [mentoringField]: "",
-  [yiiField]: "",
-  [projectsField]: "",
   info_related_to_contacting_the_partner: "",
 });
-
-const yearLabel = `${selectedStartYear.value}-${nextYear.toString().slice(-2)}`;
-
-const dynamicFields = computed(() => [
-  {
-    label: `Mentoring ${yearLabel}`,
-    key: `mentoring_${selectedStartYear.value}_${nextYear}`,
-  },
-  {
-    label: `YII ${yearLabel}`,
-    key: `yii_${selectedStartYear.value}_${nextYear}`,
-  },
-  {
-    label: `Projects ${yearLabel}`,
-    key: `projects_${selectedStartYear.value}_${nextYear}`,
-  },
-]);
 
 // 校验规则
 const rules: FormRules = {
@@ -808,9 +465,6 @@ const selectedRow: Record<string, any> = ref({
   location: "",
   uob_alumni: "",
   programme_of_study_engaged: "",
-  [mentoringField]: "",
-  [yiiField]: "",
-  [projectsField]: "",
   info_related_to_contacting_the_partner: "",
 }); // 选中的行数据
 
