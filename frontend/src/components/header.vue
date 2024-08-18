@@ -95,7 +95,7 @@ const handleCommand = async (command: string) => {
     localStorage.removeItem("User_role");
     router.push("/login");
   } else if (command === "user") {
-    router.push("/ucenter");
+    router.push("/user-center");
   } else if (command === "login") {
     router.push("/login");
   }

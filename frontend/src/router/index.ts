@@ -108,6 +108,18 @@ const routes: RouteRecordRaw[] = [
                 "../views/system/setting.vue"
                 )
       },
+      {
+        path: "/user-center",
+        name: "user-center",
+        meta: {
+          title: "User Center",
+          permiss: "user-center"
+        },
+        component: () =>
+            import(
+                "../views/system/userCenter.vue"
+                )
+      }
     ],
   },
   {

@@ -15,6 +15,7 @@ export const usePermissStore = defineStore("permiss", {
         "YiI-management",
         "projects-management",
         "setting",
+        "user-center",
       ],
       admin: [
         "system-user",
@@ -24,6 +25,7 @@ export const usePermissStore = defineStore("permiss", {
         "YiI-management",
         "projects-management",
         "setting",
+        "user-center",
       ],
       user: [
         "database-management",
@@ -31,6 +33,7 @@ export const usePermissStore = defineStore("permiss", {
         "YiI-management",
         "projects-management",
         "setting",
+        "user-center",
       ],
     } as ObjectList;
     const name = localStorage.getItem("ILO_user_name");
