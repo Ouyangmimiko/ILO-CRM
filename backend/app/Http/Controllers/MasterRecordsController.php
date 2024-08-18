@@ -80,6 +80,10 @@ class MasterRecordsController extends Controller
             'other_engagement.engagement_type' => 'nullable|string|max:255',
             'other_engagement.engagement_happened' => 'nullable|string|max:255',
             'other_engagement.notes' => 'nullable|text',
+
+            // contacting info
+            'contact_infos' => 'nullable|array',
+            'contact_infos.contacting_info' => 'nullable|string|max:255',
         ]);
 
         DB::beginTransaction();
@@ -127,6 +131,10 @@ class MasterRecordsController extends Controller
 
             if (!empty($validatedData['other_engagement'])) {
                 $masterRecord->otherEngagement()->create($validatedData['other_engagement']);
+            }
+
+            if (!empty($validatedData['contact_infos'])) {
+                $masterRecord->contactInfos()->create($validatedData['contact_infos']);
             }
 
             DB::commit();
@@ -195,6 +203,10 @@ class MasterRecordsController extends Controller
             'other_engagement.engagement_type' => 'nullable|string|max:255',
             'other_engagement.engagement_happened' => 'nullable|string|max:255',
             'other_engagement.notes' => 'nullable|text',
+
+            // contacting info
+            'contact_infos' => 'nullable|array',
+            'contact_infos.contacting_info' => 'nullable|string|max:255',
         ]);
 
         DB::beginTransaction();
@@ -274,6 +286,11 @@ class MasterRecordsController extends Controller
                 $masterRecord->otherEngagement()->create($validatedData['other_engagement']);
             }
 
+            if (!empty($validatedData['contact_infos'])) {
+                $masterRecord->contactInfos()->delete();
+                $masterRecord->contactInfos()->create($validatedData['contact_infos']);
+            }
+
             DB::commit();
 
             $updatedRecord = MasterRecord::findOrFail($id)->load(['mentoringPeriods', 'industryYears', 'projectYears', 'otherEngagement']);
@@ -310,7 +327,7 @@ class MasterRecordsController extends Controller
                     }
                 });
 
-                $relationships = ['mentoringPeriods', 'industryYears', 'projectYears', 'otherEngagement'];
+                $relationships = ['mentoringPeriods', 'industryYears', 'projectYears', 'otherEngagement', 'contactInfos'];
 
                 foreach ($relationships as $relationship) {
                     $query->orWhereHas($relationship, function ($q) use ($searchTerm, $excludeColumns) {
@@ -386,52 +403,15 @@ class MasterRecordsController extends Controller
                     }
                 });
             }
-//            $filters = $request->only([
-//                'organisation',
-//                'organisation_sector',
-//                'first_name',
-//                'surname',
-//                'job_title',
-//                'email',
-//                'location',
-//                'uob_alumni',
-//                'programme_of_study_engaged',
-//            ]); // Fields from master records
-//            $relationshipFilters = $request->only([
-//                'mentoring_periods',
-//                'industry_years',
-//                'project_years',
-//                'other_engagement'
-//            ]); // Array-based filters for relationships
-//
-//            foreach ($filters as $field => $value) {
-//                if (!empty($value)) {
-//                    $query->where($field, 'LIKE', "%{$value}%");
-//                }
-//            }
-//
-//            // Apply filters to relationships
-//            $relationshipMappings = [
-//                'mentoring_periods' => 'mentoringPeriods',
-//                'industry_years' => 'industryYears',
-//                'project_years' => 'projectYears',
-//                'other_engagement' => 'otherEngagement'
-//            ];
-//
-//            foreach ($relationshipFilters as $filterKey => $filterValues) {
-//                if (!empty($filterValues) && is_array($filterValues)) {
-//                    $relationship = $relationshipMappings[$filterKey] ?? null;
-//                    if ($relationship) {
-//                        $query->whereHas($relationship, function ($q) use ($filterValues) {
-//                            foreach ($filterValues as $field => $value) {
-//                                if (!empty($value)) {
-//                                    $q->where($field, 'LIKE', "%{$value}%");
-//                                }
-//                            }
-//                        });
-//                    }
-//                }
-//            }
+
+            // Handle contact_infos relationship
+            if (isset($requestData['contact_infos'])) {
+                $query->whereHas('contactInfos', function ($q) use ($requestData) {
+                    foreach ($requestData['contact_infos'] as $column => $value) {
+                        $q->where($column, $value);
+                    }
+                });
+            }
         } else {
             return response()->json(['error' => 'Invalid search type provided.'], 400);
         }
@@ -522,7 +502,8 @@ class MasterRecordsController extends Controller
             'projectYears' => function ($query) use ($yearRange) {
                 $query->whereIn('academic_year', $yearRange);
             },
-            'otherEngagement'
+            'otherEngagement',
+            'contactInfos'
         ])->get();
 
         return $this->formatMasterRecords($masterRecords);
@@ -565,6 +546,9 @@ class MasterRecordsController extends Controller
                     'engagement_type' => $record->otherEngagement->engagement_type ?? null,
                     'engagement_happened' => $record->otherEngagement->engagement_happened ?? null,
                     'notes' => $record->otherEngagement->notes ?? null,
+                ] : [],
+                'contact_infos' => $record->contactInfos ? [
+                    'contacting_info' => $record->contactInfos->contacting_info ?? null,
                 ] : [],
             ];
         });

@@ -15,9 +15,9 @@
     </div>
     <div class="header-right">
       <div class="header-user-con">
-        <div class="btn-icon" @click="router.push('/theme')">
-          <el-tooltip effect="light" content="Theme Setting" placement="bottom">
-            <el-icon><Bell /></el-icon>
+        <div class="btn-icon" @click="router.push('/setting')">
+          <el-tooltip effect="light" content="App Setting" placement="bottom">
+            <el-icon><Setting /></el-icon>
             <i class="el-icon-lx-skin"></i>
           </el-tooltip>
         </div>

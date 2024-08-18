@@ -47,22 +47,87 @@
       <el-button @click="exportExcel">Export</el-button>
     </div>
     <!-- table -->
-    <el-table
-        :data="masterRecords"
-        stripe
-        border
-        style="width: 100%"
-        max-height="500"
-        table-layout="fixed"
-        size="small"
-    >
-      <el-table-column
-        v-for="header in tableHeaders"
-        :key="header.prop"
-        :prop="header.prop"
-        :label="header.label"
-      ></el-table-column>
-    </el-table>
+    <div class="main_table">
+      <el-table
+          :data="masterRecords"
+          stripe
+          border
+          style="width: 100%"
+          max-height="500"
+          table-layout="auto"
+          size="small"
+      >
+        <!-- show details by expand -->
+        <el-table-column type="expand">
+          <template v-slot="props">
+            <el-form
+                label-position="left"
+                inline
+                class="details_expend"
+            >
+              <el-form-item
+                  v-for="(header, index) in baseHeaders"
+                  :key="index"
+                  class="expend_form_item"
+              >
+                <label class="expend_form_label">{{header.label}}: </label>
+                <span>{{ props.row[header.prop] }}</span>
+              </el-form-item>
+              <el-form-item class="expend_form_item">
+                <label class="expend_form_label">{{contactInfoHeader.label}}: </label>
+                <span>{{ props.row[contactInfoHeader.prop] }}</span>
+              </el-form-item>
+              <!-- show other engagement -->
+              <el-form-item
+                  v-if="ifShowOther"
+                  v-for="(header, index) in otherHeaders"
+                  :key="index"
+                  class="expend_form_item"
+              >
+                <label class="expend_form_label">{{header.label}}: </label>
+                <span>{{ props.row[header.prop] }}</span>
+              </el-form-item>
+              <el-form-item class="expend_form_item">
+                <label class="expend_form_label">More information </label>
+                <el-checkbox v-model="ifShowOther"> Other Engagement Details </el-checkbox>
+                <el-checkbox v-model="ifShowDynamic"> Show Status by selected Years</el-checkbox>
+              </el-form-item>
+              <!-- show status table -->
+              <el-table
+                  :data="[props.row]"
+                  v-if="ifShowDynamic"
+                  size="small"
+                  class="expend_table"
+              >
+                <el-table-column
+                  v-for="header in dynamicHeaders"
+                  :key="header.prop"
+                  :prop="header.prop"
+                  :label="header.label"
+                  ></el-table-column>
+              </el-table>
+            </el-form>
+          </template>
+        </el-table-column>
+        <el-table-column
+            v-for="header in tableHeaders"
+            :key="header.prop"
+            :prop="header.prop"
+            :label="header.label"
+        ></el-table-column>
+        <el-table-column
+            v-if="isAdmin"
+            label="Operation"
+            fixed="right"
+            width="170"
+        >
+          <template v-slot="props" style="display: flex; align-items: center; justify-content: flex-start; height: 100%;">
+            <el-button @click="handleEdit(props.row)" type="primary" style="width: 60px; margin-right: 10px;">Edit</el-button>
+            <el-button @click="handleDelete(props.row.id)" type="danger" style="width: 60px; margin-right: 10px;">Delete</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
   </div>
 </template>
 
@@ -71,6 +136,10 @@ import { ref, reactive, onMounted, computed } from "vue";
 import axios from "../../api/axios";
 import { ElForm, ElMessage, FormRules } from "element-plus";
 import { AxiosError } from "axios";
+
+const isAdmin = localStorage.getItem("User_role") === "admin" || localStorage.getItem("User_role") === "master";
+let ifShowOther = ref(false);
+let ifShowDynamic = ref(false);
 
 const masterRecords = ref<any[]>([]);
 const yearRange = ref<any[]>([]);
@@ -82,18 +151,22 @@ const selectedEndYear = ref();
 const currentDate = new Date();
 const currentYear = new Date().getFullYear();
 const academicYearStartDate = new Date(currentYear,8, 1);
+const betweenYears = ref(3);
+const lastYearRange = ref(20);
 const setDefaultDate = () => {
+  if (localStorage.getItem('betweenRange')) {
+    betweenYears.value = Number(localStorage.getItem('betweenRange'));
+  }
+  if (localStorage.getItem('lastYearRange')) {
+    lastYearRange.value = Number(localStorage.getItem('lastYearRange'));
+  }
   if (currentDate > academicYearStartDate) {
     selectedStartYear.value = currentYear;
   } else {
     selectedStartYear.value = currentYear - 1;
   }
-  selectedEndYear.value = selectedStartYear.value + 4;
+  selectedEndYear.value = selectedStartYear.value + betweenYears.value;
 }
-onMounted(() => {
-  setDefaultDate();
-  getMasterRecords();
-});
 
 const generateYears = (startYear: number, endYear: number) => {
   const years = [];
@@ -104,7 +177,7 @@ const generateYears = (startYear: number, endYear: number) => {
 };
 
 const StartYearOptions = computed(() => generateYears(selectedEndYear.value - 1, 2000));
-const EndYearOptions = computed(() => generateYears( selectedStartYear.value + 20, selectedStartYear.value + 1))
+const EndYearOptions = computed(() => generateYears( selectedStartYear.value + lastYearRange.value, selectedStartYear.value + 1))
 const handleStartYear = () => {
   if (selectedStartYear.value >= selectedEndYear.value) {
     selectedEndYear.value = selectedStartYear.value + 1;
@@ -115,11 +188,17 @@ const handleStartYear = () => {
 const handleEndYear = () => {
   getMasterRecords();
 }
+onMounted(() => {
+  setDefaultDate();
+  getMasterRecords();
+});
+// End of year selector part
 
+// Records formation
 const formatRecords = (records: any, yearRange : any[]) => {
   return records.map((record: any) => {
     let formattedRecord = {
-      Id: record.id,
+      id: record.id,
       organisation: record.organisation,
       organisation_sector: record.organisation_sector,
       first_name: record.first_name,
@@ -151,14 +230,16 @@ const formatRecords = (records: any, yearRange : any[]) => {
     });
 
     // format other data
-    formattedRecord['other_engagement'] = record.other_engagement
-        ? {
-          society_engaged_or_to_engage: record.other_engagement.society_engaged_or_to_engage,
-          engagement_type: record.other_engagement.engagement_type,
-          engagement_happened: record.other_engagement.engagement_happened,
-          notes: record.other_engagement.notes,
-        }
-        : null;
+    if (record.other_engagement) {
+      formattedRecord['society_engaged_or_to_engage'] = record.other_engagement.society_engaged_or_to_engage;
+      formattedRecord['engagement_type'] = record.other_engagement.engagement_type;
+      formattedRecord['engagement_happened'] = record.other_engagement.engagement_happened;
+      formattedRecord['engagement_notes'] = record.other_engagement.notes;
+    }
+    // format contacting info
+    if (record.contact_infos) {
+      formattedRecord['contacting_info'] = record.contact_infos.contacting_info;
+    }
 
     return formattedRecord;
   });
@@ -175,10 +256,17 @@ const baseHeaders = [
   {label: "Location", prop: "location"},
   {label: "UoB Alumni", prop: "uob_alumni"},
   {label: "Programme of Study Engaged", prop: "programme_of_study_engaged"},
+
 ];
-let dynamicHeaders = [];
+const contactInfoHeader = {label: "Info related to contacting the partner", prop: "contacting_info"};
+const otherHeaders = [
+  {label: "Engagement Happened", prop: "engagement_happened"},
+  {label: "Engagement Type", prop: "engagement_type"},
+  {label: "Society Engaged/to Engage", prop: "engagement_happened"},
+  {label: "Notes", prop: "notes"},
+];
+const dynamicHeaders = ref<any[]>([]);
 const getTableHeaders = (yearRange: any[]) => {
-  dynamicHeaders = [];
   let dHeaders = [] as any[];
   dHeaders = dHeaders.concat(
       yearRange.flatMap(year => [
@@ -207,7 +295,7 @@ const getTableHeaders = (yearRange: any[]) => {
         }
       ])
   );
-  dynamicHeaders.push(dHeaders);
+  dynamicHeaders.value = dHeaders;
   console.log(dynamicHeaders);
   return [...baseHeaders, ...dHeaders];
 }
@@ -328,9 +416,9 @@ const handleEdit = (row: any) => {
 
 const handleDelete = async (id: any) => {
   try {
-    await axios.delete(`/api/data/${id}`);
+    await axios.delete(`/api/records/${id}`);
     ElMessage.success("Entry deleted successfully");
-    handleQuery(); // Refresh data after deletion
+    await getMasterRecords();
   } catch (error) {
     ElMessage.error("Error deleting entry");
   }
@@ -496,49 +584,38 @@ const handleDialogClose = () => {
   background-color: #fff;
 }
 
-.query-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px; /* 间距 */
-  align-items: center; /* 对齐表单项 */
-}
-
-.el-form-item {
-  flex: 1;
-  min-width: 200px; /* 确保表单项有一定宽度 */
-}
-
-.form-select,
-.form-input {
-  width: 100%;
-}
-
-.form-actions {
-  display: flex;
-  gap: 12px; /* 间距 */
-  justify-content: flex-end; /* 将按钮对齐到右侧 */
-}
-
-.el-button {
-  min-width: 100px; /* 确保按钮有足够宽度 */
-}
-
 .function-buttons {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   display: flex;
   gap: 10px; /* 设置按钮之间的间距 */
   flex-wrap: wrap; /* 确保按钮在窄屏上换行 */
 }
 
-.table-container {
+.main_table {
   background-color: #fff;
   padding: 20px;
   border-radius: 4px;
 }
 
-.el-table {
-  border-radius: 4px;
-  overflow: hidden;
+.details_expend {
+  margin-left: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  width: 50vw;
+}
+
+.details_expend .expend_form_item {
+  flex: 1 1 35%;
+}
+.details_expend .expend_form_label{
+  margin-right: 20px;
+  color: #99a9bf;
+}
+
+.expend_table {
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .el-table th {
@@ -549,53 +626,5 @@ const handleDialogClose = () => {
 
 .el-table td {
   text-align: center;
-}
-
-.table-column {
-  text-align: center;
-}
-
-.operation-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
-}
-
-.pagination-wrapper {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-}
-
-.styled-dialog {
-  max-height: 80vh;
-  overflow: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.dialog-content {
-  text-align: center;
-}
-
-.dynamic-table-container {
-  margin: 0 auto;
-  width: fit-content;
-}
-
-.el-table {
-  /* margin: 0 auto; */
-  text-align: center;
-}
-
-.two-column-form .el-form-item {
-  margin-bottom: 20px;
-}
-
-.contact-info-item {
-  text-align: left;
 }
 </style>

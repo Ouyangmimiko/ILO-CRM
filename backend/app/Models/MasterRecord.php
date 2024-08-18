@@ -51,6 +51,11 @@ class MasterRecord extends Model
         return $this->hasOne(OtherEngagement::class);
     }
 
+    public function contactInfos () : HasOne
+    {
+        return $this->hasOne(ContactInfo::class);
+    }
+
     public function getUobAlumniAttribute($value)
     {
         return $value;

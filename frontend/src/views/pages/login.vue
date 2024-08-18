@@ -113,6 +113,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
           localStorage.setItem("ILO_user", user);
           localStorage.setItem("ILO_user_name", user.name);
           localStorage.setItem("User_role", is_admin === 1 ? "admin" : "user");
+          localStorage.setItem("User_role", user.name === "admin" ? "master" : "admin");
           // Store api token
           localStorage.setItem("auth_token", token);
 

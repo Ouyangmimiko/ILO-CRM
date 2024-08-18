@@ -96,6 +96,18 @@ const routes: RouteRecordRaw[] = [
             /* webpackChunkName: "system-user" */ "../views/engagement/projects.vue"
           ),
       },
+      {
+        path: "/setting",
+        name: "setting",
+        meta: {
+          title: "Setting",
+          permiss: "setting",
+        },
+        component: () =>
+            import(
+                "../views/system/setting.vue"
+                )
+      },
     ],
   },
   {
