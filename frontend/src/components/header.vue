@@ -24,7 +24,7 @@
         <!--Have logged in-->
         <template v-if="isLoggedIn">
           <!-- User Avatar -->
-          <el-avatar class="user-avator" :size="30" :src="imgurl" />
+<!--          <el-avatar class="user-avator" :size="30" :src="imgurl" />-->
           <!-- User Info -->
           <el-dropdown class="user-name" trigger="click" @command="handleCommand">
           <span class="el-dropdown-link">

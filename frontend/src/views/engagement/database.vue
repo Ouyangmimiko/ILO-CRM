@@ -7,6 +7,7 @@
           placeholder="Start Year"
           :style="{ width: '5em' }"
           @change="handleStartYear"
+          style="margin-right: 10px"
       >
         <el-option
             v-for="year in StartYearOptions"
@@ -15,12 +16,13 @@
             :value="year"
         />
        </el-select>
-      <span > to </span>
+      <span > To </span>
       <el-select
           v-model="selectedEndYear"
           placeholder="End Year"
           :style="{ width: '5em' }"
           @change="handleEndYear"
+          style="margin-left: 10px"
       >
         <el-option
             v-for="year in EndYearOptions"
@@ -128,6 +130,27 @@
         </el-table-column>
       </el-table>
     </div>
+    <div>
+      <el-dialog
+          v-model="isDialogVisible"
+          :before-close="handleClose"
+          class="function-dialog"
+          width="50%"
+      >
+        <div v-if="functionMode === 'add'"></div>
+        <div v-if="functionMode === 'edit'">
+          <h3>Edit</h3>
+        </div>
+        <div v-if="functionMode === 'delete'">
+          <h3>Delete this record ?</h3>
+
+        </div>
+        <template #footer>
+          <el-button @click="handleClose">Cancel</el-button>
+          <el-button type="primary" @click="handleConfirm">{{ confirmButtonText }}</el-button>
+        </template>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -135,15 +158,13 @@
 import { ref, reactive, onMounted, computed } from "vue";
 import axios from "../../api/axios";
 import { ElForm, ElMessage, FormRules } from "element-plus";
-import { AxiosError } from "axios";
+// import { AxiosError } from "axios";
 
+// if show edit and delete in table
 const isAdmin = localStorage.getItem("User_role") === "admin" || localStorage.getItem("User_role") === "master";
+// show more info in expend detail
 let ifShowOther = ref(false);
 let ifShowDynamic = ref(false);
-
-const masterRecords = ref<any[]>([]);
-const yearRange = ref<any[]>([]);
-const tableHeaders = ref<any[]>([]);
 
 // Year select
 const selectedStartYear = ref();
@@ -300,6 +321,10 @@ const getTableHeaders = (yearRange: any[]) => {
   return [...baseHeaders, ...dHeaders];
 }
 
+// GET records
+const masterRecords = ref<any[]>([]);
+const yearRange = ref<any[]>([]);
+const tableHeaders = ref<any[]>([]);
 const getMasterRecords = async () => {
   try {
     const response = await axios.get('/api//records_by_year_range', {
@@ -320,101 +345,40 @@ const getMasterRecords = async () => {
   }
 }
 
+// Dialog
+const functionMode = ref<string>(''); //'add', 'edit', or 'search'
+const idToOperate = ref<string>('');
+const isDialogVisible = ref<boolean>(false);
+const confirmButtonText = ref<string>('');
 
-const queryForm = reactive({
-  // search_all: true, // boolean for search_all
-  search_type: "",
-  search_term: "",
-});
-
-const dialogVisible = ref(false);
-
-const dynamicYears = computed(() => {
-  return Array.from({ length: 4 }, (_, i) => {
-    const startYear = currentYear - i;
-    const endYear = startYear + 1;
-    return `${startYear}_${endYear.toString().slice(-2)}`;
-  });
-});
-
-const editForm: Record<string, any> = reactive({
-  id: "", // 默认空值
-  organisation: "",
-  organisation_sector: "",
-  first_name: "",
-  surname: "",
-  job_title: "",
-  email: "",
-  location: "",
-  uob_alumni: "",
-  programme_of_study_engaged: "",
-  info_related_to_contacting_the_partner: "",
-});
-
-// 校验规则
-const rules: FormRules = {
-  email: [
-    { required: true, message: "Email is required", trigger: "blur" },
-    {
-      type: "email",
-      message: "Invalid email address",
-      trigger: ["blur", "change"],
-    },
-  ],
-  // 其他字段的校验规则
-};
-
-// 表单引用
-const formRef = ref<InstanceType<typeof ElForm> | null>(null);
-
-const data = ref<any[]>([]);
-
-const fileList = ref([]);
-const uploadUrl = "/api/import";
-
-const handleQuery = async () => {
-  try {
-    const { search_type, search_term } = queryForm;
-
-    // Construct query parameters
-    const params: any = {};
-
-    if (search_type) {
-      params.search_type = search_type;
-    }
-    if (search_term) {
-      params.search_term = search_term;
-    }
-
-    // Make request
-    const response = await axios.get("/api/customers", { params });
-    data.value = response.data.customers;
-  } catch (error) {
-    console.error("Query failed:", error);
-  }
-};
-
-const handleReset = () => {
-  queryForm.search_type = "";
-  queryForm.search_term = "";
-  handleQuery(); // Trigger query after resetting
-};
-
-const handleAdd = () => {
-  // 清空表单并设置为新增模式
-  Object.keys(editForm).forEach((key) => {
-    editForm[key as keyof typeof editForm] = "";
-  });
-  editForm.id = ""; // 清空ID，表示新增
-  dialogVisible.value = true;
-};
+const handleClose = () => {
+  isDialogVisible.value = false;
+  idToOperate.value = '';
+}
 
 const handleEdit = (row: any) => {
-  Object.assign(editForm, row);
-  dialogVisible.value = true;
+  isDialogVisible.value = true;
+  functionMode.value = 'edit';
+  idToOperate.value = row.id;
 };
 
-const handleDelete = async (id: any) => {
+const handleDelete = (id: any) => {
+  isDialogVisible.value = true;
+  functionMode.value = 'delete';
+  idToOperate.value = id;
+  confirmButtonText.value = 'Confirm Delete';
+}
+
+const handleConfirm = () => {
+  switch (functionMode.value) {
+    case 'delete':
+      deleteRecord(idToOperate.value);
+      handleClose();
+      break;
+  }
+}
+
+const deleteRecord = async (id: any) => {
   try {
     await axios.delete(`/api/records/${id}`);
     ElMessage.success("Entry deleted successfully");
@@ -425,156 +389,33 @@ const handleDelete = async (id: any) => {
 };
 
 // Handle file upload
-const handleBeforeUpload = (file: string | Blob) => {
-  // Create FormData object
-  const formData = new FormData();
-  formData.append("file", file);
-
-  // Upload the file
-  axios
-    .post(uploadUrl, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    })
-    .then(() => {
-      ElMessage.success("File uploaded successfully");
-      handleQuery(); // Refresh data after successful upload
-    })
-    .catch(() => {
-      ElMessage.error("Error uploading file");
-    });
-
-  // Prevent the default upload behavior
-  return false;
-};
+// const handleBeforeUpload = (file: string | Blob) => {
+//   // Create FormData object
+//   const formData = new FormData();
+//   formData.append("file", file);
+//
+//   // Upload the file
+//   axios
+//     .post(uploadUrl, formData, {
+//       headers: {
+//         "Content-Type": "multipart/form-data",
+//       },
+//     })
+//     .then(() => {
+//       ElMessage.success("File uploaded successfully");
+//       handleQuery(); // Refresh data after successful upload
+//     })
+//     .catch(() => {
+//       ElMessage.error("Error uploading file");
+//     });
+//
+//   // Prevent the default upload behavior
+//   return false;
+// };
 
 // Handle file remove
 const handleRemove = () => {
   // Handle file removal logic if necessary
-};
-
-const exportExcel = () => {
-  axios
-    .get("/api/export", { responseType: "blob" })
-    .then(() => {
-      const url = window.URL.createObjectURL(new Blob());
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", "export.xlsx"); // You can specify the file name here
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    })
-    .catch(() => {
-      ElMessage.error("Error exporting data");
-    });
-};
-
-const handleClose = () => {
-  dialogVisible.value = false;
-};
-
-const handleConfirm = async () => {
-  try {
-    // 校验表单
-    await formRef.value?.validate();
-
-    if (editForm.id) {
-      // 如果存在ID，则是编辑模式，执行更新操作
-      const response = await axios.put(`/api/update/${editForm.id}`, editForm);
-
-      if (response.status === 200 || response.status === 201) {
-        ElMessage.success(response.data.message);
-        handleClose();
-        handleQuery();
-      } else {
-        ElMessage.error(response.data.errors);
-      }
-    } else {
-      // 如果没有ID，则是新增模式，执行新增操作
-      const response = await axios.post("/api/create", editForm);
-
-      if (response.status === 201) {
-        ElMessage.success(response.data.message);
-        handleClose();
-        handleQuery();
-      } else {
-        ElMessage.error(response.data.errors);
-      }
-    }
-  } catch (error: unknown) {
-    if (error instanceof AxiosError) {
-      console.error("Update failed:", error);
-
-      const errorMessage = error.response?.data.errors;
-      if (errorMessage) {
-        // 确保 errorMessage 是对象
-        if (typeof errorMessage === "object" && errorMessage !== null) {
-          // 提取错误信息并格式化为字符串
-          const formattedErrors = Object.entries(errorMessage)
-            .map(([field, messages]) => {
-              // 确保 messages 是数组
-              if (Array.isArray(messages)) {
-                return `${field}: ${messages.join(", ")}`;
-              }
-              return `${field}: Unknown error format`;
-            })
-            .join("; ");
-
-          ElMessage.error(formattedErrors);
-        } else {
-          ElMessage.error("An error occurred");
-        }
-      } else {
-        ElMessage.error("An unexpected error occurred");
-      }
-    } else {
-      console.error("Unexpected error:", error);
-      ElMessage.error("An unexpected error occurred");
-    }
-  }
-};
-
-// Automatically trigger query on component mount
-onMounted(() => {
-  handleQuery();
-});
-
-const detailDialogVisible = ref(false);
-const selectedRow: Record<string, any> = ref({
-  id: "", // 默认空值
-  organisation: "",
-  organisation_sector: "",
-  first_name: "",
-  surname: "",
-  job_title: "",
-  email: "",
-  location: "",
-  uob_alumni: "",
-  programme_of_study_engaged: "",
-  info_related_to_contacting_the_partner: "",
-}); // 选中的行数据
-
-const dynamicData = computed(() => {
-  if (!selectedRow.value) return [];
-  return dynamicYears.value.map((year) => ({
-    year: year.replace("_", "/"),
-    mentoring: selectedRow.value[`mentoring_${year}`],
-    yii: selectedRow.value[`yii_${year}`],
-    projects: selectedRow.value[`projects_${year}`],
-  }));
-});
-
-const showDetail = (row: any) => {
-  // Object.assign(selectedRow, row);
-  selectedRow.value = row;
-  detailDialogVisible.value = true;
-};
-
-// 处理关闭对话框
-const handleDialogClose = () => {
-  detailDialogVisible.value = false;
 };
 </script>
 
@@ -582,6 +423,13 @@ const handleDialogClose = () => {
 .container {
   padding: 20px;
   background-color: #fff;
+}
+
+.YearSelector{
+  display: flex;
+  margin-left: auto;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .function-buttons {
