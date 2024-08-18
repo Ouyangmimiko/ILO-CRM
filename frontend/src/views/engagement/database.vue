@@ -1,5 +1,34 @@
 <template>
   <div class="container">
+    <!-- Search-->
+    <div class="search">
+      <el-select
+      v-model="searchMode"
+      placeholder="Search Mode"
+      size="default"
+      style="width: 6em; margin-right: 10px"
+      >
+        <el-option
+          v-for="item in searchOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"/>
+      </el-select>
+      <el-input
+          v-if="searchMode === 'all'"
+          v-model="searchTerm"
+          title="Term"
+          placeholder="Enter search term"
+          clearable
+          style="display: flex; width: 30%"
+      ></el-input>
+      <el-button
+          type="primary"
+          @click="handleSearch"
+          size="default"
+          style="margin-left: 10px"
+      >Search</el-button>
+    </div>
     <!-- Year Selector-->
     <div class="YearSelector">
       <el-select
@@ -62,53 +91,56 @@
         <!-- show details by expand -->
         <el-table-column type="expand">
           <template v-slot="props">
-            <el-form
+            <el-descriptions
+                :column="2"
                 label-position="left"
-                inline
-                class="details_expend"
+                size="small"
+                border
+                style="margin-left: 10px; width: 70vw"
             >
-              <el-form-item
+              <el-descriptions-item
                   v-for="(header, index) in baseHeaders"
                   :key="index"
-                  class="expend_form_item"
+                  :label="header.label"
               >
-                <label class="expend_form_label">{{header.label}}: </label>
-                <span>{{ props.row[header.prop] }}</span>
-              </el-form-item>
-              <el-form-item class="expend_form_item">
-                <label class="expend_form_label">{{contactInfoHeader.label}}: </label>
-                <span>{{ props.row[contactInfoHeader.prop] }}</span>
-              </el-form-item>
+                {{ props.row[header.prop] }}
+              </el-descriptions-item>
+              <el-descriptions-item
+                  class="expend_form_item"
+                  :label="contactInfoHeader.label"
+              >
+                {{ props.row[contactInfoHeader.prop] }}
+              </el-descriptions-item>
+
               <!-- show other engagement -->
-              <el-form-item
+              <el-descriptions-item
                   v-if="ifShowOther"
                   v-for="(header, index) in otherHeaders"
                   :key="index"
-                  class="expend_form_item"
-              >
-                <label class="expend_form_label">{{header.label}}: </label>
-                <span>{{ props.row[header.prop] }}</span>
-              </el-form-item>
-              <el-form-item class="expend_form_item">
-                <label class="expend_form_label">More information </label>
-                <el-checkbox v-model="ifShowOther"> Other Engagement Details </el-checkbox>
-                <el-checkbox v-model="ifShowDynamic"> Show Status by selected Years</el-checkbox>
-              </el-form-item>
-              <!-- show status table -->
-              <el-table
-                  :data="[props.row]"
-                  v-if="ifShowDynamic"
-                  size="small"
-                  class="expend_table"
-              >
-                <el-table-column
-                  v-for="header in dynamicHeaders"
-                  :key="header.prop"
-                  :prop="header.prop"
                   :label="header.label"
-                  ></el-table-column>
-              </el-table>
-            </el-form>
+              >
+                {{ props.row[header.prop] }}
+              </el-descriptions-item>
+              <!-- show status table -->
+              <el-descriptions-item v-if="ifShowDynamic" class="expend_form_item">
+                <el-table
+                    :data="[props.row]"
+                    size="small"
+                    class="expend_table"
+                >
+                  <el-table-column
+                      v-for="header in dynamicHeaders"
+                      :key="header.prop"
+                      :prop="header.prop"
+                      :label="header.label"
+                  />
+                </el-table>
+              </el-descriptions-item>
+            </el-descriptions>
+            <div style="margin-left: 20px">
+              <el-checkbox v-model="ifShowOther"> Other Engagement Details </el-checkbox>
+              <el-checkbox v-model="ifShowDynamic"> Show Status by selected Years </el-checkbox>
+            </div>
           </template>
         </el-table-column>
         <el-table-column
@@ -137,9 +169,14 @@
           class="function-dialog"
           width="50%"
       >
-        <div v-if="functionMode === 'add'"></div>
+        <div v-if="functionMode === 'add'">
+          <h3>Add a new record</h3>
+        </div>
         <div v-if="functionMode === 'edit'">
           <h3>Edit</h3>
+        </div>
+        <div v-if="functionMode === 'search' && searchMode === 'specific'">
+          <h3>Specific Search</h3>
         </div>
         <div v-if="functionMode === 'delete'">
           <h3>Delete this record ?</h3>
@@ -158,6 +195,7 @@
 import { ref, reactive, onMounted, computed } from "vue";
 import axios from "../../api/axios";
 import { ElForm, ElMessage, FormRules } from "element-plus";
+import {AxiosError} from "axios";
 // import { AxiosError } from "axios";
 
 // if show edit and delete in table
@@ -327,7 +365,7 @@ const yearRange = ref<any[]>([]);
 const tableHeaders = ref<any[]>([]);
 const getMasterRecords = async () => {
   try {
-    const response = await axios.get('/api//records_by_year_range', {
+    const response = await axios.get('/api/records_by_year_range', {
       params: {
         academic_year_start: selectedStartYear.value,
         academic_year_end: selectedEndYear.value,
@@ -345,6 +383,62 @@ const getMasterRecords = async () => {
   }
 }
 
+// Search
+const searchMode = ref<string>('all');
+const searchTerm = ref<string>(''); 
+const searchOptions = [
+  {label:'All', value:'all'},
+  {label:'Specific', value:'specific'},
+];
+const handleSearch = () => {
+  if (searchMode.value === 'specific') {
+    isDialogVisible.value = true;
+    functionMode.value = 'search';
+    confirmButtonText.value = 'Search';
+  }
+  if (searchTerm.value === '') {
+    getMasterRecords();
+  } else {
+    searchRecords();
+  }
+};
+const searchRecords = async () => {
+  if (searchMode.value === 'all') {
+    try {
+      const response = await axios.get('/api/records/search/all', {
+        params: {
+          'year_range': yearRange.value,
+          'search_term': searchTerm.value,
+        }
+      });
+      const searchedRecords = response.data.data;
+      masterRecords.value = formatRecords(searchedRecords, yearRange.value);
+    } catch (error) {
+      if (error instanceof AxiosError && error.response && error.response.data) {
+        let errorMessage = [];
+        errorMessage.push(error.response.data.message);
+        if (error.response.data.errors) {
+          for (let field in error.response.data.errors) {
+            if (error.response.data.errors.hasOwnProperty(field)) {
+              error.response.data.errors[field].forEach((errMsg: string) => {
+                errorMessage.push(`${field}: ${errMsg}`);
+              });
+            }
+          }
+        }
+        console.log(errorMessage.join('\n'));
+        ElMessage({
+          message: errorMessage.join('<br>'),
+          type: 'error',
+          dangerouslyUseHTMLString: true
+        });
+      } else {
+        ElMessage.error('An unexpected error occurred while search.');
+      }
+    }
+  } else if (searchMode.value === 'specific') {};
+};
+
 // Dialog
 const functionMode = ref<string>(''); //'add', 'edit', or 'search'
 const idToOperate = ref<string>('');
@@ -354,12 +448,21 @@ const confirmButtonText = ref<string>('');
 const handleClose = () => {
   isDialogVisible.value = false;
   idToOperate.value = '';
+  functionMode.value = '';
+  confirmButtonText.value = 'no mode';
+}
+
+const handleAdd = () => {
+  isDialogVisible.value = true;
+  functionMode.value = 'add';
+  confirmButtonText.value = 'Confirm Add'
 }
 
 const handleEdit = (row: any) => {
   isDialogVisible.value = true;
   functionMode.value = 'edit';
   idToOperate.value = row.id;
+  confirmButtonText.value = 'Confirm Edit';
 };
 
 const handleDelete = (id: any) => {
@@ -373,9 +476,24 @@ const handleConfirm = () => {
   switch (functionMode.value) {
     case 'delete':
       deleteRecord(idToOperate.value);
-      handleClose();
+      break;
+    case 'edit':
+      updateRecord(idToOperate.value);
+      break;
+    case 'add':
+      storeRecord();
+      break;
+    case 'search':
+      searchRecords();
       break;
   }
+  handleClose();
+}
+
+const storeRecord = async () => {}
+
+const updateRecord = async (id: any) => {
+
 }
 
 const deleteRecord = async (id: any) => {
@@ -425,6 +543,13 @@ const handleRemove = () => {
   background-color: #fff;
 }
 
+.search{
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 70vw;
+}
+
 .YearSelector{
   display: flex;
   margin-left: auto;
@@ -446,11 +571,11 @@ const handleRemove = () => {
 }
 
 .details_expend {
-  margin-left: 20px;
+  margin-left: 10px;
   display: flex;
   flex-wrap: wrap;
-  gap: 0;
-  width: 50vw;
+  gap: 10px;
+  width: 60vw;
 }
 
 .details_expend .expend_form_item {
