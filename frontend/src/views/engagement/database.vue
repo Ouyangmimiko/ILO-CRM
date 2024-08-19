@@ -180,8 +180,16 @@
         </div>
         <div v-if="functionMode === 'delete'">
           <h3>Delete this record ?</h3>
-
         </div>
+        <el-form :model="formRecordToUse" :rules="formRules" ref="formRef" v-if="ifShowForm" status-icon>
+          <el-form-item v-for="header in tableHeaders" :key="header.prop" :label="header.label">
+            <el-input
+                
+                @input="activateField(header.prop)"
+                v-model="formRecordToUse[header.prop]"
+            />
+          </el-form-item>
+        </el-form>
         <template #footer>
           <el-button @click="handleClose">Cancel</el-button>
           <el-button type="primary" @click="handleConfirm">{{ confirmButtonText }}</el-button>
@@ -325,9 +333,12 @@ const otherHeaders = [
   {label: "Notes", prop: "notes"},
 ];
 const dynamicHeaders = ref<any[]>([]);
+const mentoringHeaders = ref<any[]>([]);
+const yearInIndustryHeaders = ref<any[]>([]);
+const projectClientHeaders = ref<any[]>([]);
 const getTableHeaders = (yearRange: any[]) => {
   let dHeaders = [] as any[];
-  dHeaders = dHeaders.concat(
+  mentoringHeaders.value = mentoringHeaders.value.concat(
       yearRange.flatMap(year => [
         {
           label: `Mentoring ${year}`,
@@ -336,7 +347,7 @@ const getTableHeaders = (yearRange: any[]) => {
         }
       ])
   );
-  dHeaders = dHeaders.concat(
+  yearInIndustryHeaders.value = yearInIndustryHeaders.value.concat(
       yearRange.flatMap(year => [
         {
           label: `Year in Industry ${year}`,
@@ -345,7 +356,7 @@ const getTableHeaders = (yearRange: any[]) => {
         }
       ])
   );
-  dHeaders = dHeaders.concat(
+  projectClientHeaders.value = projectClientHeaders.value.concat(
       yearRange.flatMap(year => [
         {
           label: `Project Client ${year}`,
@@ -354,6 +365,7 @@ const getTableHeaders = (yearRange: any[]) => {
         }
       ])
   );
+  dHeaders = [...mentoringHeaders.value, ...yearInIndustryHeaders.value, ...projectClientHeaders.value ];
   dynamicHeaders.value = dHeaders;
   console.log(dynamicHeaders);
   return [...baseHeaders, ...dHeaders];
@@ -375,6 +387,8 @@ const getMasterRecords = async () => {
     yearRange.value = response.data.year_range;
     masterRecords.value = formatRecords(records, yearRange.value);
     tableHeaders.value = getTableHeaders(yearRange.value);
+    // Generate complete form headers
+    formHeaders.value = [...tableHeaders.value, ...otherHeaders, contactInfoHeader];
     console.log(records);
     console.log(masterRecords.value);
     console.log(tableHeaders.value);
@@ -382,6 +396,43 @@ const getMasterRecords = async () => {
     ElMessage.error("Error in getMasterRecords");
   }
 }
+
+// Form
+const ifShowForm = ref(false);
+const formRecordToUse = ref<any>({});
+const formHeaders = ref<any[]>([]);
+const formRef = ref(null);
+// set fields having value as activated
+const activatedFields = ref<Record<string, boolean>>({});
+const initialiseActivatedFields = (record = {}) => {
+  formHeaders.value.forEach(header => {
+    // Activated while this field has value, fields without value are unactivated
+    activatedFields.value[header.prop] = !!record[header.prop as keyof typeof record];
+  })
+};
+
+const formRules = {
+  organisation: [{required: true, message: 'Please input organisation', trigger: 'blur'}],
+  first_name: [{required: true, message: 'Please input first name', trigger: 'blur'}],
+  surname: [{required: true, message: 'Please input surname', trigger: 'blur'}],
+  email: [{required: true, message: 'Please input email', trigger: 'blur'}],
+};
+
+// Generate form model
+const initialiseFormModel = (record = {}) => {
+  formRecordToUse.value = {};
+  formHeaders.value.forEach((header) => {
+    // initial form data, store exist data in form record
+    formRecordToUse.value[header.prop as keyof typeof record] = record[header.prop as keyof typeof record] || '';
+  });
+}
+
+// Activate  checked prop in form
+const activateField = (prop: string) => {
+  if (!activatedFields.value[prop]) {
+    activatedFields.value[prop] = true;
+  }
+};
 
 // Search
 const searchMode = ref<string>('all');
@@ -392,9 +443,12 @@ const searchOptions = [
 ];
 const handleSearch = () => {
   if (searchMode.value === 'specific') {
+    initialiseActivatedFields();
+    initialiseFormModel();
     isDialogVisible.value = true;
     functionMode.value = 'search';
     confirmButtonText.value = 'Search';
+    ifShowForm.value = true;
   }
   if (searchTerm.value === '') {
     getMasterRecords();
@@ -436,7 +490,9 @@ const searchRecords = async () => {
         ElMessage.error('An unexpected error occurred while search.');
       }
     }
-  } else if (searchMode.value === 'specific') {};
+  } else if (searchMode.value === 'specific') {
+    console.log(formRecordToUse.value);
+  };
 };
 
 // Dialog
@@ -447,22 +503,32 @@ const confirmButtonText = ref<string>('');
 
 const handleClose = () => {
   isDialogVisible.value = false;
+  ifShowForm.value = false;
   idToOperate.value = '';
   functionMode.value = '';
+  initialiseActivatedFields();
+  initialiseFormModel();
   confirmButtonText.value = 'no mode';
 }
 
 const handleAdd = () => {
-  isDialogVisible.value = true;
+  ifShowForm.value = true;
   functionMode.value = 'add';
   confirmButtonText.value = 'Confirm Add'
+  initialiseActivatedFields();
+  initialiseFormModel();
+  isDialogVisible.value = true;
 }
 
 const handleEdit = (row: any) => {
-  isDialogVisible.value = true;
+  ifShowForm.value = true;
   functionMode.value = 'edit';
   idToOperate.value = row.id;
   confirmButtonText.value = 'Confirm Edit';
+  initialiseActivatedFields(row);
+  initialiseFormModel(row);
+  console.log(formRecordToUse.value);
+  isDialogVisible.value = true;
 };
 
 const handleDelete = (id: any) => {
@@ -490,10 +556,12 @@ const handleConfirm = () => {
   handleClose();
 }
 
-const storeRecord = async () => {}
+const storeRecord = async () => {
+  console.log(formRecordToUse.value);
+}
 
 const updateRecord = async (id: any) => {
-
+  console.log(id + formRecordToUse.value);
 }
 
 const deleteRecord = async (id: any) => {
@@ -566,7 +634,7 @@ const handleRemove = () => {
 
 .main_table {
   background-color: #fff;
-  padding: 20px;
+  padding: 0;
   border-radius: 4px;
 }
 

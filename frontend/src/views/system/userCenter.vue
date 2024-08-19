@@ -8,9 +8,8 @@ import {AxiosError} from "axios";
 const userInfo = ref<any>(null);
 const userRole = localStorage.getItem("User_role");
 const ifShowForm = ref(false);
-const inputDisable = (info: any) => {
-  return info.name === 'admin';
-};
+const inputDisable = ref(false);
+
 const form = reactive({
   name: '',
   email: '',
@@ -36,6 +35,7 @@ const getUserInfo = async () => {
     form.name = response.data.name;
     form.email = response.data.email;
     form.is_admin = response.data.is_admin;
+    inputDisable.value = response.data.name === "admin";
   } catch (e) {
     ElMessage.error("An unexpected error occurred");
   }

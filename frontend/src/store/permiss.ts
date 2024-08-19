@@ -40,6 +40,8 @@ export const usePermissStore = defineStore("permiss", {
     const role = localStorage.getItem("User_role");
     if (name === "admin" && (role === "admin" || role === "master")) {
       localStorage.setItem("User_role", "master");
+    }
+    if (role === "master") {
       return {
         key: defaultList.master as string[],
         defaultList,
