@@ -615,7 +615,7 @@ const handleRemove = () => {
 .search{
   display: flex;
   justify-content: flex-start;
-  align-items: center;
+  align-items: baseline;
   width: 70vw;
 }
 

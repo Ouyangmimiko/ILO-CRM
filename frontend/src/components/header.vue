@@ -2,7 +2,7 @@
   <div class="header">
     <!-- Fold Button -->
     <div class="header-left">
-      <img class="logo" src="../assets/vue.svg" alt="" />
+      <img class="logo" src="../assets/ILO.png" alt="" />
       <div class="web-title">ILO CRM</div>
       <div class="collapse-btn" @click="collapseChange">
         <el-icon v-if="sidebar.collapse">
@@ -60,7 +60,6 @@ import { onMounted, computed } from "vue";
 import { useSidebarStore } from "../store/siderbar";
 import { useRouter } from "vue-router";
 import { Expand, Fold } from "@element-plus/icons-vue";
-import imgurl from "../assets/img/avatar.png";
 import axios from "../api/axios";
 
 const isLoggedIn = computed(() => {

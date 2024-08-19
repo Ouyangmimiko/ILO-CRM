@@ -5,14 +5,14 @@ export const menuData: Menus[] = [
     id: "0",
     title: "Welcome",
     index: "/welcome",
-    icon: "Odometer",
+    icon: "HomeFilled",
     permissions: ["user", "admin", "noAuth", "master"],
   },
   {
     id: "1",
     title: "Engagement Management",
     index: "1",
-    icon: "HomeFilled",
+    icon: "Grid",
     permissions: ["user", "admin", "master"],
     children: [
       {
@@ -49,7 +49,7 @@ export const menuData: Menus[] = [
     id: "2",
     title: "User Management",
     index: "2",
-    icon: "Calendar",
+    icon: "User",
     permissions: ["master"],
     children: [
       {
