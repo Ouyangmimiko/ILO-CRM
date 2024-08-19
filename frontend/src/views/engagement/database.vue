@@ -399,7 +399,7 @@ const getMasterRecords = async () => {
 
 // Form
 const ifShowForm = ref(false);
-const formRecordToUse = ref<any>({});
+const formRecordToUse = reactive<any>({});
 const formHeaders = ref<any[]>([]);
 const formRef = ref(null);
 // set fields having value as activated
@@ -411,12 +411,12 @@ const initialiseActivatedFields = (record = {}) => {
   })
 };
 
-const formRules = {
+const formRules = reactive({
   organisation: [{required: true, message: 'Please input organisation', trigger: 'blur'}],
   first_name: [{required: true, message: 'Please input first name', trigger: 'blur'}],
   surname: [{required: true, message: 'Please input surname', trigger: 'blur'}],
   email: [{required: true, message: 'Please input email', trigger: 'blur'}],
-};
+});
 
 // Generate form model
 const initialiseFormModel = (record = {}) => {
@@ -539,6 +539,7 @@ const handleDelete = (id: any) => {
 }
 
 const handleConfirm = () => {
+  f
   switch (functionMode.value) {
     case 'delete':
       deleteRecord(idToOperate.value);

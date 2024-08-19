@@ -27,7 +27,7 @@ let id = 0;
 const getUserInfo = async () => {
   try {
     const userId = localStorage.getItem("ILO_userId");
-    if (userId !== null && userId !== "") {
+    if (userId != null && userId !== "") {
       id = parseInt(userId);
     }
     const response = await axios.get(`/api/users/${id}`);
@@ -48,7 +48,6 @@ const handleConfirm = async () => {
   } catch (error) {
     if (error instanceof AxiosError && error.response && error.response.data) {
       let errorMessage = [];
-      errorMessage.push(error.response.data.message);
       if (error.response.data.errors) {
         for (let field in error.response.data.errors) {
           if (error.response.data.errors.hasOwnProperty(field)) {
