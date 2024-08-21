@@ -64,18 +64,19 @@
     </div>
     <!-- Function Button -->
     <div class="function-buttons">
-      <el-button type="primary" @click="handleAdd">Add</el-button>
-      <el-upload
-        :action="uploadUrl"
-        :before-upload="handleBeforeUpload"
-        :auto-upload="true"
-        :file-list="fileList"
-        :on-remove="handleRemove"
-      >
-        <el-button>Upload Excel</el-button>
-      </el-upload>
+      <el-button type="primary" @click="handleAdd" v-if="isAdmin">Add</el-button>
+<!--      <el-upload-->
+<!--        :action="uploadUrl"-->
+<!--        :before-upload="handleBeforeUpload"-->
+<!--        :auto-upload="true"-->
+<!--        :file-list="fileList"-->
+<!--        :on-remove="handleRemove"-->
+<!--        v-if="isAdmin"-->
+<!--      >-->
+<!--        <el-button>Upload Excel <el-icon style="margin-left: 1em"><UploadFilled /></el-icon></el-button>-->
+<!--      </el-upload>-->
 
-      <el-button @click="exportExcel">Export</el-button>
+<!--      <el-button @click="exportExcel">Export <el-icon style="margin-left: 1em"><Download /></el-icon></el-button>-->
     </div>
     <!-- table -->
     <div class="main_table">
@@ -156,8 +157,20 @@
             width="170"
         >
           <template v-slot="props" style="display: flex; align-items: center; justify-content: flex-start; height: 100%;">
-            <el-button @click="handleEdit(props.row)" type="primary" style="width: 60px; margin-right: 10px;">Edit</el-button>
-            <el-button @click="handleDelete(props.row.id)" type="danger" style="width: 60px; margin-right: 10px;">Delete</el-button>
+            <el-button
+                @click="handleEdit(props.row)" link style="width: 60px; margin-right: 10px; color: #337ecc"
+            >
+              Edit
+              <el-icon style="margin-left: 2px"><Edit /></el-icon>
+            </el-button>
+            <el-button
+                @click="handleDelete(props.row.id)"
+                link
+                style="width: 60px; margin-right: 10px; color: #99a9bf;"
+            >
+              Delete
+              <el-icon style="margin-left: 2px"><Delete /></el-icon>
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -181,16 +194,77 @@
         <div v-if="functionMode === 'delete'">
           <h3>Delete this record ?</h3>
         </div>
-        <el-form :model="formRecordToUse" :rules="formRules" ref="formRef" v-if="ifShowForm" status-icon>
-          <el-form-item v-for="header in tableHeaders" :key="header.prop" :label="header.label">
-            <el-input
-                
-                @input="activateField(header.prop)"
-                v-model="formRecordToUse[header.prop]"
-            />
-          </el-form-item>
+        <el-form
+            ref="formRef"
+            :model="formRecordToUse"
+            :rules="formRules"
+            v-if="ifShowForm"
+            scroll-to-error
+        >
+          <div style="display: flex; justify-content: space-between;  margin-bottom: 20px; flex-wrap: wrap; margin-top: 20px; width: 100%">
+            <el-form-item v-for="header in baseHeaders" :key="header.prop" :label="header.label" :prop="header.prop"
+                          style="flex: 1 1 40%;" label-position="top"
+            >
+              <el-input v-model="formRecordToUse[header.prop]" style="width: 300px"></el-input>
+            </el-form-item>
+            <el-form-item  :key="contactInfoHeader.label" :label="contactInfoHeader.label" :prop="contactInfoHeader.prop"
+                           style="flex: 1 1 100%;" label-position="top"
+            >
+              <el-input v-model="formRecordToUse[contactInfoHeader.prop]" style="width: 80%"></el-input>
+            </el-form-item>
+            <el-container style="flex: 1 1 100%; display: flex; flex-wrap: wrap; border: 1px solid #888888; margin-bottom: 10px;">
+              <h3 style="flex: 1 1 100%; margin: 5px 0 5px 5px">Mentoring status <el-checkbox v-model="checkMentoring"></el-checkbox></h3>
+              <el-form-item v-for="header in mentoringHeaders" :key="header.prop" :label="header.label" :prop="header.prop"
+                            style="flex: 1 1 40%; margin: 5px 0 10px 5px" label-position="top" v-show="checkMentoring"
+              >
+                <el-checkbox v-model="activatedFields[header.prop]" style="margin-right: 10%" @change="handleItemCheck"></el-checkbox>
+                <el-switch
+                    v-model="formRecordToUse[header.prop]"
+                    :disabled="!activatedFields[header.prop]"
+                    active-value = 'yes'
+                    inactive-value = 'no'
+                    active-text="yes"
+                    inactive-text="no"
+                ></el-switch>
+              </el-form-item>
+            </el-container>
+            <el-container style="flex: 1 1 100%; display: flex; flex-wrap: wrap; border: 1px solid #888888; margin-bottom: 10px;">
+                <h3 style="flex: 1 1 100%; margin: 5px 0 5px 5px">Year in Industry status <el-checkbox v-model="checkIndustry"></el-checkbox></h3>
+                <el-form-item v-for="header in yearInIndustryHeaders" :key="header.prop" :label="header.label" :prop="header.prop"
+                              style="flex: 1 1 40%; margin: 5px 0 10px 5px" label-position="top" v-show="checkIndustry"
+                >
+                  <el-checkbox v-model="activatedFields[header.prop]" style="margin-right: 10%" @change="handleItemCheck"></el-checkbox>
+                  <el-switch
+                      v-model="formRecordToUse[header.prop]"
+                      :disabled="!activatedFields[header.prop]"
+                      active-value = 'yes'
+                      inactive-value = 'no'
+                      active-text="yes"
+                      inactive-text="no"
+                  ></el-switch>
+                </el-form-item>
+            </el-container>
+            <el-container style="flex: 1 1 100%; display: flex; flex-wrap: wrap; border: 1px solid #888888; margin-bottom: 10px;">
+              <h3 style="flex: 1 1 100%; margin: 5px 0 5px 5px">Project Client status <el-checkbox v-model="checkProject"></el-checkbox></h3>
+              <el-form-item v-for="header in projectClientHeaders" :key="header.prop" :label="header.label" :prop="header.prop"
+                            style="flex: 1 1 40%; margin: 5px 0 10px 5px" label-position="top" v-show="checkProject"
+              >
+                <el-checkbox v-model="activatedFields[header.prop]" style="margin-right: 5px" @change="handleItemCheck"></el-checkbox>
+                <el-input v-model="formRecordToUse[header.prop]" style="width: 80%" :disabled="!activatedFields[header.prop]"></el-input>
+              </el-form-item>
+            </el-container>
+            <el-container style="flex: 1 1 100%; display: flex; flex-wrap: wrap; border: 1px solid #888888; margin-bottom: 10px;">
+              <h3 style="flex: 1 1 100%; margin: 5px 0 5px 5px">Other Engagement <el-checkbox v-model="checkOther"></el-checkbox></h3>
+              <el-form-item v-for="header in otherHeaders" :key="header.prop" :label="header.label" :prop="header.prop"
+                            style="flex: 1 1 40%; margin: 5px 0 10px 5px" label-position="top" v-show="checkOther"
+              >
+                <el-input v-model="formRecordToUse[header.prop]" style="width: 80%"></el-input>
+              </el-form-item>
+            </el-container>
+          </div>
         </el-form>
         <template #footer>
+          <el-button v-if="functionMode !== 'delete'" @click="handleReset" link>Reset</el-button>
           <el-button @click="handleClose">Cancel</el-button>
           <el-button type="primary" @click="handleConfirm">{{ confirmButtonText }}</el-button>
         </template>
@@ -337,7 +411,10 @@ const mentoringHeaders = ref<any[]>([]);
 const yearInIndustryHeaders = ref<any[]>([]);
 const projectClientHeaders = ref<any[]>([]);
 const getTableHeaders = (yearRange: any[]) => {
-  let dHeaders = [] as any[];
+  let dHeaders: any[];
+  mentoringHeaders.value = [];
+  yearInIndustryHeaders.value = [];
+  projectClientHeaders.value = [];
   mentoringHeaders.value = mentoringHeaders.value.concat(
       yearRange.flatMap(year => [
         {
@@ -399,9 +476,23 @@ const getMasterRecords = async () => {
 
 // Form
 const ifShowForm = ref(false);
-const formRecordToUse = reactive<any>({});
-const formHeaders = ref<any[]>([]);
-const formRef = ref(null);
+const formRecordToUse = reactive<Record<string, any>>({});
+const originalForm = reactive<Record<string, any>>({});
+const formHeaders = ref<Record<string, any>[]>([]);
+const formRef = ref<InstanceType<typeof ElForm> | null>(null);
+const formRules = reactive<FormRules>({});
+const checkMentoring = ref(false);
+const checkIndustry = ref(false);
+const checkProject = ref(false);
+const checkOther = ref(false);
+
+const baseRules = {
+  organisation: [{required: true, message: 'Please input organisation', trigger: 'blur'}],
+  first_name: [{required: true, message: 'Please input first name', trigger: 'blur'}],
+  surname: [{required: true, message: 'Please input surname', trigger: 'blur'}],
+  email: [{required: true, message: 'Please input email', trigger: 'blur'}],
+};
+
 // set fields having value as activated
 const activatedFields = ref<Record<string, boolean>>({});
 const initialiseActivatedFields = (record = {}) => {
@@ -411,28 +502,44 @@ const initialiseActivatedFields = (record = {}) => {
   })
 };
 
-const formRules = reactive({
-  organisation: [{required: true, message: 'Please input organisation', trigger: 'blur'}],
-  first_name: [{required: true, message: 'Please input first name', trigger: 'blur'}],
-  surname: [{required: true, message: 'Please input surname', trigger: 'blur'}],
-  email: [{required: true, message: 'Please input email', trigger: 'blur'}],
-});
-
 // Generate form model
 const initialiseFormModel = (record = {}) => {
-  formRecordToUse.value = {};
   formHeaders.value.forEach((header) => {
     // initial form data, store exist data in form record
-    formRecordToUse.value[header.prop as keyof typeof record] = record[header.prop as keyof typeof record] || '';
+    formRecordToUse[header.prop as keyof typeof record] = record[header.prop as keyof typeof record] || '';
   });
+  Object.assign(originalForm, formRecordToUse);
 }
 
-// Activate  checked prop in form
-const activateField = (prop: string) => {
-  if (!activatedFields.value[prop]) {
-    activatedFields.value[prop] = true;
-  }
+const setRules = () => {
+  Object.keys(formRules).forEach(key => delete formRules[key]);
+  Object.assign(formRules, baseRules);
+  dynamicHeaders.value.forEach((header) => {
+    if(activatedFields.value[header.prop]) {
+      formRules[header.prop] = [{required: true, message: 'Please input activated field', trigger: 'blur'}];
+    }
+  })
+  console.log(formRules);
 };
+
+const handleItemCheck = () => {
+  if (!(functionMode.value === 'search')) {
+    setRules();
+  }
+}
+
+const handleReset = () => {
+  if (!formRef.value) return;
+  formRef.value.resetFields();
+  Object.assign(formRecordToUse, originalForm);
+  if (functionMode.value === 'edit') {
+    initialiseActivatedFields(originalForm);
+  } else {
+    initialiseActivatedFields();
+  }
+  handleItemCheck();
+  console.log(formRecordToUse);
+}
 
 // Search
 const searchMode = ref<string>('all');
@@ -491,8 +598,8 @@ const searchRecords = async () => {
       }
     }
   } else if (searchMode.value === 'specific') {
-    console.log(formRecordToUse.value);
-  };
+    console.log(formRecordToUse);
+  }
 };
 
 // Dialog
@@ -508,6 +615,9 @@ const handleClose = () => {
   functionMode.value = '';
   initialiseActivatedFields();
   initialiseFormModel();
+  Object.keys(formRules).forEach(key => {
+    delete formRules[key];
+  });
   confirmButtonText.value = 'no mode';
 }
 
@@ -517,6 +627,7 @@ const handleAdd = () => {
   confirmButtonText.value = 'Confirm Add'
   initialiseActivatedFields();
   initialiseFormModel();
+  setRules();
   isDialogVisible.value = true;
 }
 
@@ -527,7 +638,8 @@ const handleEdit = (row: any) => {
   confirmButtonText.value = 'Confirm Edit';
   initialiseActivatedFields(row);
   initialiseFormModel(row);
-  console.log(formRecordToUse.value);
+  setRules();
+  console.log(formRecordToUse);
   isDialogVisible.value = true;
 };
 
@@ -539,30 +651,60 @@ const handleDelete = (id: any) => {
 }
 
 const handleConfirm = () => {
-  f
+  if (formRef.value) {
+    formRef.value.validate(valid => {
+      if (valid) {
+
+      } else {
+        ElMessage.error("")
+      }
+    });
+  }
   switch (functionMode.value) {
     case 'delete':
       deleteRecord(idToOperate.value);
       break;
     case 'edit':
       updateRecord(idToOperate.value);
+      console.log(formRecordToUse);
       break;
     case 'add':
+      console.log(formRecordToUse);
+      console.log('Organisation:', formRecordToUse.organisation);
       storeRecord();
+
       break;
     case 'search':
       searchRecords();
       break;
   }
-  handleClose();
 }
 
-const storeRecord = async () => {
-  console.log(formRecordToUse.value);
+const storeRecord = () => {
+  if (formRef.value) {
+    formRef.value.validate((valid) => {
+      if (valid) {
+        handleClose();
+      } else {
+        console.log('表单校验失败');
+      }
+    });
+  } else {
+    console.log('formRef is null');
+  }
 }
 
 const updateRecord = async (id: any) => {
-  console.log(id + formRecordToUse.value);
+  if (formRef.value) {
+    await formRef.value.validate((valid, fields) => {
+      if (valid) {
+        console.log('Form submitted successfully!');
+        handleClose();
+      } else {
+        console.log('Form submission error:', fields);
+      }
+    });
+  }
 }
 
 const deleteRecord = async (id: any) => {
@@ -570,6 +712,7 @@ const deleteRecord = async (id: any) => {
     await axios.delete(`/api/records/${id}`);
     ElMessage.success("Entry deleted successfully");
     await getMasterRecords();
+    handleClose();
   } catch (error) {
     ElMessage.error("Error deleting entry");
   }
@@ -601,42 +744,47 @@ const deleteRecord = async (id: any) => {
 // };
 
 // Handle file remove
-const handleRemove = () => {
-  // Handle file removal logic if necessary
-};
+// const handleRemove = () => {
+//   // Handle file removal logic if necessary
+// };
 </script>
 
 <style scoped>
 .container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
   padding: 20px;
   background-color: #fff;
 }
 
 .search{
   display: flex;
-  justify-content: flex-start;
-  align-items: baseline;
-  width: 70vw;
+  align-items: center;
+  width: 50%;
 }
 
 .YearSelector{
   display: flex;
-  margin-left: auto;
-  justify-content: flex-end;
   align-items: center;
 }
 
 .function-buttons {
+  margin-top: 20px;
   margin-bottom: 10px;
   display: flex;
+  flex-basis: 100%;
   gap: 10px; /* 设置按钮之间的间距 */
   flex-wrap: wrap; /* 确保按钮在窄屏上换行 */
 }
 
 .main_table {
+  flex-basis: 100%;
   background-color: #fff;
   padding: 0;
   border-radius: 4px;
+  width: 100%;
 }
 
 .details_expend {
