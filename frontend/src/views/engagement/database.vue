@@ -493,7 +493,7 @@ const baseRules = {
   organisation: [{required: true, message: 'Please input organisation', trigger: 'blur'}],
   first_name: [{required: true, message: 'Please input first name', trigger: 'blur'}],
   surname: [{required: true, message: 'Please input surname', trigger: 'blur'}],
-  email: [{required: true, message: 'Please input email', trigger: 'blur'}],
+  email: [{required: true, message: 'Please input valid email', trigger: 'blur', type: 'email'}],
 };
 
 // set fields having value as activated
