@@ -48,6 +48,7 @@ const handleConfirm = async () => {
   } catch (error) {
     if (error instanceof AxiosError && error.response && error.response.data) {
       let errorMessage = [];
+      errorMessage.push(error.response.data.message);
       if (error.response.data.errors) {
         for (let field in error.response.data.errors) {
           if (error.response.data.errors.hasOwnProperty(field)) {
@@ -64,7 +65,7 @@ const handleConfirm = async () => {
         dangerouslyUseHTMLString: true
       });
     } else {
-      ElMessage.error('An unexpected error occurred while search.');
+      ElMessage.error('An unexpected error occurred while update.');
     }
   }
 };
@@ -96,10 +97,10 @@ onMounted(() => {
     </el-descriptions>
     <el-button type="primary" @click="handleEdit" v-if="!ifShowForm">Edit</el-button>
     <el-form :model="form" v-if="ifShowForm" style="width: 25vw">
-      <el-form-item label="Username" prop="name">
+      <el-form-item label="Username" prop="name" label-position="top">
         <el-input style="margin-left: auto; justify-content: flex-end; width: 300px" :disabled="inputDisable" v-model="form.name" />
       </el-form-item>
-      <el-form-item label="Email address" prop="email">
+      <el-form-item label="Email address" prop="email" label-position="top">
         <el-input style="margin-left: auto; justify-content: flex-end; width: 300px" v-model="form.email" />
       </el-form-item>
     </el-form>
