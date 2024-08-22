@@ -378,7 +378,7 @@ const formatRecords = (records: any, yearRange : any[]) => {
       formattedRecord['society_engaged_or_to_engage'] = record.other_engagement.society_engaged_or_to_engage;
       formattedRecord['engagement_type'] = record.other_engagement.engagement_type;
       formattedRecord['engagement_happened'] = record.other_engagement.engagement_happened;
-      formattedRecord['engagement_notes'] = record.other_engagement.notes;
+      formattedRecord['notes'] = record.other_engagement.notes;
     }
     // format contacting info
     if (record.contact_infos) {
@@ -406,7 +406,7 @@ const contactInfoHeader = {label: "Info related to contacting the partner", prop
 const otherHeaders = [
   {label: "Engagement Happened", prop: "engagement_happened"},
   {label: "Engagement Type", prop: "engagement_type"},
-  {label: "Society Engaged/to Engage", prop: "engagement_happened"},
+  {label: "Society Engaged/to Engage", prop: "society_engaged_or_to_engage"},
   {label: "Notes", prop: "notes"},
 ];
 const dynamicHeaders = ref<any[]>([]);
