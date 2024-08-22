@@ -75,4 +75,8 @@ class UserController extends Controller
             'message' => 'User deleted successfully'
         ]);
     }
+
+    public function changePassword(Request $request, $id) {
+        
+    }
 }
