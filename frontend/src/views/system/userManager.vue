@@ -145,7 +145,23 @@ const creatUser = async () => {
     await getUsers();
   } catch (error) {
     if (error instanceof AxiosError && error.response && error.response.data) {
-      ElMessage.error(error.response.data.message);
+      let errorMessage = [];
+      errorMessage.push(error.response.data.message);
+      if (error.response.data.errors) {
+        for (let field in error.response.data.errors) {
+          if (error.response.data.errors.hasOwnProperty(field)) {
+            error.response.data.errors[field].forEach((errMsg: string) => {
+              errorMessage.push(`${field}: ${errMsg}`);
+            });
+          }
+        }
+      }
+      console.log(errorMessage.join('\n'));
+      ElMessage({
+        message: errorMessage.join('<br>'),
+        type: 'error',
+        dangerouslyUseHTMLString: true
+      });
     } else {
       ElMessage.error('An unexpected error occurred while creating user.');
     }

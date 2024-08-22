@@ -16,6 +16,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::rename('projects', 'project_years');
+        Schema::rename('project_years', 'projects');
     }
 };

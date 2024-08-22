@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\MasterRecord;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 class MasterRecordsController extends Controller
 {
@@ -16,7 +18,8 @@ class MasterRecordsController extends Controller
     {
         // Default index with current academic year
         $currentAcademicYear = $this->getCurrentAcademicYearRange();
-        $masterRecords = $this->getMasterRecordsByYearRange($currentAcademicYear);
+//        $masterRecords = $this->getMasterRecordsByYearRange($currentAcademicYear);
+        $masterRecords = $this->getRecordsByYearRange(new MasterRecord, $currentAcademicYear);
         return response()->json([$masterRecords]);
     }
 
@@ -38,7 +41,8 @@ class MasterRecordsController extends Controller
             return response()->json(['error' => 'Start year must be less than end year'],400);
         }
         $yearRange = $this->getAcademicYearRange($startYear, $endYear);
-        $masterRecords = $this->getMasterRecordsByYearRange($yearRange);
+//        $masterRecords = $this->getMasterRecordsByYearRange($yearRange);
+        $masterRecords = $this->getRecordsByYearRange(new MasterRecord, $yearRange);
         return response()->json(['data' => $masterRecords, 'year_range' => $yearRange]);
     }
 
@@ -52,13 +56,13 @@ class MasterRecordsController extends Controller
             'job_title' => 'nullable|string|max:255',
             'email' => ['required','email', 'unique:master_records,email'],
             'location' => 'nullable|string|max:255',
-            'uob_alumni' => 'nullable|string|regex:/^(yes|no)$/',
-            'programme_of_study_engaged' => 'string|max:255',
+            'uob_alumni' => ['nullable', 'string', 'regex:/^(yes|no)$/'],
+            'programme_of_study_engaged' => 'nullable|string|max:255',
 
             // mentoring periods
             'mentoring_periods' => 'nullable|array',
             'mentoring_periods.*.academic_year' =>  ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
-            'mentoring_periods.*.status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
+            'mentoring_periods.*.mentoring_status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
 
             // industry years
             'industry_years' => 'nullable|array',
@@ -76,6 +80,10 @@ class MasterRecordsController extends Controller
             'other_engagement.engagement_type' => 'nullable|string|max:255',
             'other_engagement.engagement_happened' => 'nullable|string|max:255',
             'other_engagement.notes' => 'nullable|text',
+
+            // contacting info
+            'contact_infos' => 'nullable|array',
+            'contact_infos.contacting_info' => 'nullable|string|max:255',
         ]);
 
         DB::beginTransaction();
@@ -98,7 +106,7 @@ class MasterRecordsController extends Controller
                 foreach ($validatedData['mentoring_periods'] as $mentoringPeriod) {
                     $masterRecord->mentoringPeriods()->create([
                         'academic_year' => $mentoringPeriod['academic_year'],
-                        'mentoring_status' => $mentoringPeriod['status'],
+                        'mentoring_status' => $mentoringPeriod['mentoring_status'],
                     ]);
                 }
             }
@@ -125,6 +133,10 @@ class MasterRecordsController extends Controller
                 $masterRecord->otherEngagement()->create($validatedData['other_engagement']);
             }
 
+            if (!empty($validatedData['contact_infos'])) {
+                $masterRecord->contactInfos()->create($validatedData['contact_infos']);
+            }
+
             DB::commit();
 
             return response()->json(['message' => 'Record created successfully.','data' => $masterRecord], 201);
@@ -132,7 +144,7 @@ class MasterRecordsController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json(['error' => 'Failed to create record.'], 500);
+            return response()->json(['error' => 'Failed to create record.'.$e], 500);
         }
     }
 
@@ -167,13 +179,13 @@ class MasterRecordsController extends Controller
             'job_title' => 'nullable|string|max:255',
             'email' => ['required','email', 'unique:master_records,email,' . $id],
             'location' => 'nullable|string|max:255',
-            'uob_alumni' => 'nullable|string|regex:/^(yes|no)$/',
-            'programme_of_study_engaged' => 'string|max:255',
+            'uob_alumni' => ['nullable', 'string', 'regex:/^(yes|no)$/'],
+            'programme_of_study_engaged' => 'nullable|string|max:255',
 
             // mentoring periods
             'mentoring_periods' => 'nullable|array',
             'mentoring_periods.*.academic_year' =>  ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
-            'mentoring_periods.*.status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
+            'mentoring_periods.*.mentoring_status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
 
             // industry years
             'industry_years' => 'nullable|array',
@@ -191,6 +203,10 @@ class MasterRecordsController extends Controller
             'other_engagement.engagement_type' => 'nullable|string|max:255',
             'other_engagement.engagement_happened' => 'nullable|string|max:255',
             'other_engagement.notes' => 'nullable|text',
+
+            // contacting info
+            'contact_infos' => 'nullable|array',
+            'contact_infos.contacting_info' => 'nullable|string|max:255',
         ]);
 
         DB::beginTransaction();
@@ -219,7 +235,7 @@ class MasterRecordsController extends Controller
                     if ($existingRecord) {
                         // if exist
                         $existingRecord->update([
-                            'mentoring_status' => $mentoringPeriod['status'],
+                            'mentoring_status' => $mentoringPeriod['mentoring_status'],
                         ]);
                     } else {
                         // creat new records
@@ -270,6 +286,11 @@ class MasterRecordsController extends Controller
                 $masterRecord->otherEngagement()->create($validatedData['other_engagement']);
             }
 
+            if (!empty($validatedData['contact_infos'])) {
+                $masterRecord->contactInfos()->delete();
+                $masterRecord->contactInfos()->create($validatedData['contact_infos']);
+            }
+
             DB::commit();
 
             $updatedRecord = MasterRecord::findOrFail($id)->load(['mentoringPeriods', 'industryYears', 'projectYears', 'otherEngagement']);
@@ -281,9 +302,122 @@ class MasterRecordsController extends Controller
         }
     }
 
-    public function search(Request $request)
+    public function search(Request $request, $searchType)
     {
+        $yearRange = [];
+        if ($request->filled('year_range')) {
+            $yearRange = $request->input('year_range');
+        } else {
+            return response()->json(['error' => 'No valid year range provided.'], 400);
+        }
+        $query = MasterRecord::query();
+        if ($searchType == 'all') {
+            if ($request->filled('search_term')) {
+                $searchTerm = $request->input('search_term');
 
+                $excludeColumns = ['id','master_record_id', 'created_at', 'updated_at'];
+
+                // search master_records
+                $recordColumns = Schema::getColumnListing((new MasterRecord)->getTable());
+                $query->where(function ($q) use ($recordColumns, $searchTerm, $excludeColumns) {
+                    foreach ($recordColumns as $column) {
+                        if (!in_array($column, $excludeColumns)) {
+                            $q->orWhere($column, 'LIKE', "%{$searchTerm}%");
+                        }
+                    }
+                });
+
+                $relationships = ['mentoringPeriods', 'industryYears', 'projectYears', 'otherEngagement', 'contactInfos'];
+
+                foreach ($relationships as $relationship) {
+                    $query->orWhereHas($relationship, function ($q) use ($searchTerm, $excludeColumns) {
+                        $relatedModel = $q->getModel();
+                        $relatedColumns = Schema::getColumnListing($relatedModel->getTable());
+
+                        $q->where(function ($q) use ($relatedColumns, $searchTerm, $excludeColumns) {
+                            foreach ($relatedColumns as $column) {
+                                if (!in_array($column, $excludeColumns)) {
+                                    $q->orWhere($column, 'LIKE', "%{$searchTerm}%");
+                                }
+                            }
+                        });
+                    });
+                }
+            } else {
+                return response()->json(['message' => 'No search term entered'], 400);
+            }
+        } else if ($searchType == 'specific') {
+            // Get the request data
+            $requestData = $request->all();
+
+            // Handle master_records fields
+            $excludeColumns = ['id', 'master_record_id', 'created_at', 'updated_at'];
+            foreach ($requestData as $key => $value) {
+                if (in_array($key, $excludeColumns)) {
+                    continue;
+                }
+
+                if ($key !== 'mentoring_periods' && $key !== 'industry_years' && $key !== 'year_range') {
+                    $query->where($key, $value);
+                }
+            }
+
+            // Handle mentoring_periods relationship
+            if (isset($requestData['mentoring_periods'])) {
+                $query->whereHas('mentoringPeriods', function ($q) use ($requestData) {
+                    foreach ($requestData['mentoring_periods'] as $filter) {
+                        foreach ($filter as $column => $value) {
+                            $q->where($column, 'LIKE', "%{$value}%");
+                        }
+                    }
+                });
+            }
+
+            // Handle industry_years relationship
+            if (isset($requestData['industry_years'])) {
+                $query->whereHas('industryYears', function ($q) use ($requestData) {
+                    foreach ($requestData['industry_years'] as $filter) {
+                        foreach ($filter as $column => $value) {
+                            $q->where($column, $value);
+                        }
+                    }
+                });
+            }
+
+            // Handle project_years relationship
+            if (isset($requestData['project_years'])) {
+                $query->whereHas('projectYears', function ($q) use ($requestData) {
+                    foreach ($requestData['project_years'] as $filter) {
+                        foreach ($filter as $column => $value) {
+                            $q->where($column, $value);
+                        }
+                    }
+                });
+            }
+
+            // Handle other_engagement relationship
+            if (isset($requestData['other_engagement'])) {
+                $query->whereHas('otherEngagement', function ($q) use ($requestData) {
+                    foreach ($requestData['other_engagement'] as $column => $value) {
+                        $q->where($column, $value);
+                    }
+                });
+            }
+
+            // Handle contact_infos relationship
+            if (isset($requestData['contact_infos'])) {
+                $query->whereHas('contactInfos', function ($q) use ($requestData) {
+                    foreach ($requestData['contact_infos'] as $column => $value) {
+                        $q->where($column, $value);
+                    }
+                });
+            }
+        } else {
+            return response()->json(['error' => 'Invalid search type provided.'], 400);
+        }
+        $records = $this->getRecordsByYearRange($query, $yearRange);
+
+        return response()->json(['data' => $records]);
     }
 
     public function getMasterRecordsByYearRange(array $yearRange)
@@ -303,7 +437,7 @@ class MasterRecordsController extends Controller
             },
             'otherEngagement'
         ])->get();
-        
+
         $formattedMasterRecords = $masterRecords->map(function ($record) {
             return [
                 'id' => $record->id,
@@ -319,7 +453,7 @@ class MasterRecordsController extends Controller
                 'mentoring_periods' => $record->mentoringPeriods ? $record->mentoringPeriods->map(function ($mentoringPeriod) {
                     return [
                         'academic_year' => $mentoringPeriod->academic_year,
-                        'status' => $mentoringPeriod->mentoring_status,
+                        'mentoring_status' => $mentoringPeriod->mentoring_status,
                     ];
                 }) : [],
                 'industry_years' => $record->industryYears ? $record->industryYears->map(function ($industryYear) {
@@ -330,7 +464,7 @@ class MasterRecordsController extends Controller
                 }) : [],
                 'project_years' => $record->projectYears ? $record->projectYears->map(function ($projectYear) {
                     return [
-                        'year' => $projectYear->academic_year,
+                        'academic_year' => $projectYear->academic_year,
                         'project_client' => $projectYear->project_client,
                     ];
                 }) : [],
@@ -343,6 +477,81 @@ class MasterRecordsController extends Controller
             ];
         });
         return $formattedMasterRecords;
+    }
+
+    public function getRecordsByYearRange($queryOrModel, array $yearRange)
+    {
+        if (empty($yearRange)) {
+            return ['error' => 'No valid years provided.'];
+        }
+        if ($queryOrModel instanceof MasterRecord) {
+            $query = $queryOrModel::query();
+        } elseif ($queryOrModel instanceof Builder) {
+            $query = $queryOrModel;
+        } else {
+            return ['error' => 'Invalid parameter type.'];
+        }
+
+        $masterRecords = $query->with([
+            'mentoringPeriods' => function ($query) use ($yearRange) {
+                $query->whereIn('academic_year', $yearRange);
+            },
+            'industryYears' => function ($query) use ($yearRange) {
+                $query->whereIn('academic_year', $yearRange);
+            },
+            'projectYears' => function ($query) use ($yearRange) {
+                $query->whereIn('academic_year', $yearRange);
+            },
+            'otherEngagement',
+            'contactInfos'
+        ])->get();
+
+        return $this->formatMasterRecords($masterRecords);
+    }
+
+    private function formatMasterRecords($masterRecords)
+    {
+        return $masterRecords->map(function ($record) {
+            return [
+                'id' => $record->id,
+                'organisation' => $record->organisation,
+                'organisation_sector' => $record->organisation_sector,
+                'first_name' => $record->first_name,
+                'surname' => $record->surname,
+                'job_title' => $record->job_title,
+                'email' => $record->email,
+                'location' => $record->location,
+                'uob_alumni' => $record->uob_alumni,
+                'programme_of_study_engaged' => $record->programme_of_study_engaged,
+                'mentoring_periods' => $record->mentoringPeriods ? $record->mentoringPeriods->map(function ($mentoringPeriod) {
+                    return [
+                        'academic_year' => $mentoringPeriod->academic_year,
+                        'mentoring_status' => $mentoringPeriod->mentoring_status,
+                    ];
+                }) : [],
+                'industry_years' => $record->industryYears ? $record->industryYears->map(function ($industryYear) {
+                    return [
+                        'academic_year' => $industryYear->academic_year,
+                        'had_placement_status' => $industryYear->had_placement_status,
+                    ];
+                }) : [],
+                'project_years' => $record->projectYears ? $record->projectYears->map(function ($projectYear) {
+                    return [
+                        'academic_year' => $projectYear->academic_year,
+                        'project_client' => $projectYear->project_client,
+                    ];
+                }) : [],
+                'other_engagement' => $record->otherEngagement ? [
+                    'society_engaged_or_to_engage' => $record->otherEngagement->society_engaged_or_to_engage ?? null,
+                    'engagement_type' => $record->otherEngagement->engagement_type ?? null,
+                    'engagement_happened' => $record->otherEngagement->engagement_happened ?? null,
+                    'notes' => $record->otherEngagement->notes ?? null,
+                ] : [],
+                'contact_infos' => $record->contactInfos ? [
+                    'contacting_info' => $record->contactInfos->contacting_info ?? null,
+                ] : [],
+            ];
+        });
     }
 
     public function getCurrentAcademicYearRange(): array

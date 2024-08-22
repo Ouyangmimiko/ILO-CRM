@@ -16,6 +16,8 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/logout', [AuthController::class, 'logout']);
     Route::get('/loginStatus', [AuthController::class, 'checkLoginStatus']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
+    Route::put('/users/{id}', [UserController::class, 'update']);
 });
 
 // UserController
@@ -27,9 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware(['auth:sanctum', EnsureAdminRole::class])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
-    Route::get('/users/{id}', [UserController::class, 'show']);
     Route::post('/users/add', [UserController::class, 'store']);
-    Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
 });
 
@@ -47,4 +47,4 @@ Route::get('/records_by_year_range', [MasterRecordsController::class, 'indexByYe
 Route::post('/records/add', [MasterRecordsController::class, 'store']);
 Route::delete('/records/{id}', [MasterRecordsController::class, 'destroy']);
 Route::put('/records/{id}', [MasterRecordsController::class, 'update']);
-Route::get('/records/search', [MasterRecordsController::class, 'search']);
+Route::get('/records/search/{searchType}', [MasterRecordsController::class, 'search']);

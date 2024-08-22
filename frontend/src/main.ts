@@ -10,6 +10,15 @@ import router from "./router";
 
 const pinia = createPinia();
 
+function iniLocalStorage() {
+  if (!localStorage.getItem('initialised')) {
+    localStorage.setItem('lastYearRange', '10');
+    localStorage.setItem('betweenRange', '3')
+    localStorage.setItem('initialised', 'true');
+  }
+}
+iniLocalStorage();
+
 const app = createApp(App);
 app.use(pinia);
 app.use(router);

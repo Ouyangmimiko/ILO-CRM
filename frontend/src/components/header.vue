@@ -2,7 +2,7 @@
   <div class="header">
     <!-- Fold Button -->
     <div class="header-left">
-      <img class="logo" src="../assets/vue.svg" alt="" />
+      <img class="logo" src="../assets/ILO.png" alt="" />
       <div class="web-title">ILO CRM</div>
       <div class="collapse-btn" @click="collapseChange">
         <el-icon v-if="sidebar.collapse">
@@ -15,16 +15,16 @@
     </div>
     <div class="header-right">
       <div class="header-user-con">
-        <div class="btn-icon" @click="router.push('/theme')">
-          <el-tooltip effect="light" content="Theme Setting" placement="bottom">
-            <el-icon><Bell /></el-icon>
+        <div class="btn-icon" @click="router.push('/setting')">
+          <el-tooltip effect="light" content="App Setting" placement="bottom">
+            <el-icon><Setting /></el-icon>
             <i class="el-icon-lx-skin"></i>
           </el-tooltip>
         </div>
         <!--Have logged in-->
         <template v-if="isLoggedIn">
           <!-- User Avatar -->
-          <el-avatar class="user-avator" :size="30" :src="imgurl" />
+<!--          <el-avatar class="user-avator" :size="30" :src="imgurl" />-->
           <!-- User Info -->
           <el-dropdown class="user-name" trigger="click" @command="handleCommand">
           <span class="el-dropdown-link">
@@ -60,7 +60,6 @@ import { onMounted, computed } from "vue";
 import { useSidebarStore } from "../store/siderbar";
 import { useRouter } from "vue-router";
 import { Expand, Fold } from "@element-plus/icons-vue";
-import imgurl from "../assets/img/avatar.png";
 import axios from "../api/axios";
 
 const isLoggedIn = computed(() => {
@@ -95,7 +94,7 @@ const handleCommand = async (command: string) => {
     localStorage.removeItem("User_role");
     router.push("/login");
   } else if (command === "user") {
-    router.push("/ucenter");
+    router.push("/user-center");
   } else if (command === "login") {
     router.push("/login");
   }

@@ -111,8 +111,13 @@ const submitForm = async (formEl: FormInstance | undefined) => {
           const { user, token, is_admin } = response.data;
           // Store user
           localStorage.setItem("ILO_user", user);
+          localStorage.setItem("ILO_userId", user.id.toString());
           localStorage.setItem("ILO_user_name", user.name);
-          localStorage.setItem("User_role", is_admin === 1 ? "admin" : "user");
+          if (user.name === 'admin') {
+            localStorage.setItem("User_role", 'master');
+          } else {
+            localStorage.setItem("User_role", is_admin === 1 ? "admin" : "user");
+          }
           // Store api token
           localStorage.setItem("auth_token", token);
 
@@ -144,7 +149,6 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     }
   });
 };
-console.log(permiss.key);
 </script>
 
 <style scoped>
