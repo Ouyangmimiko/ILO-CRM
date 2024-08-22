@@ -92,56 +92,59 @@
         <!-- show details by expand -->
         <el-table-column type="expand">
           <template v-slot="props">
-            <el-descriptions
-                :column="2"
-                label-position="left"
-                size="small"
-                border
-                style="margin-left: 10px; width: 70vw"
-            >
-              <el-descriptions-item
-                  v-for="(header, index) in baseHeaders"
-                  :key="index"
-                  :label="header.label"
+            <el-container style="border: 1px solid #888888; width: 70vw; display: flex; flex-wrap: wrap; margin-left: 10px;">
+              <el-descriptions
+                  :column="2"
+                  label-position="left"
+                  size="small"
+                  border
+                  style="margin-left: 10px; width: 100%; max-width: 100%"
               >
-                {{ props.row[header.prop] }}
-              </el-descriptions-item>
-              <el-descriptions-item
-                  class="expend_form_item"
-                  :label="contactInfoHeader.label"
-              >
-                {{ props.row[contactInfoHeader.prop] }}
-              </el-descriptions-item>
-
-              <!-- show other engagement -->
-              <el-descriptions-item
-                  v-if="ifShowOther"
-                  v-for="(header, index) in otherHeaders"
-                  :key="index"
-                  :label="header.label"
-              >
-                {{ props.row[header.prop] }}
-              </el-descriptions-item>
-              <!-- show status table -->
-              <el-descriptions-item v-if="ifShowDynamic" class="expend_form_item">
-                <el-table
-                    :data="[props.row]"
-                    size="small"
-                    class="expend_table"
+                <el-descriptions-item
+                    v-for="(header, index) in baseHeaders"
+                    :key="index"
+                    :label="header.label"
                 >
-                  <el-table-column
-                      v-for="header in dynamicHeaders"
-                      :key="header.prop"
-                      :prop="header.prop"
-                      :label="header.label"
-                  />
-                </el-table>
-              </el-descriptions-item>
-            </el-descriptions>
-            <div style="margin-left: 20px">
-              <el-checkbox v-model="ifShowOther"> Other Engagement Details </el-checkbox>
-              <el-checkbox v-model="ifShowDynamic"> Show Status by selected Years </el-checkbox>
-            </div>
+                  {{ props.row[header.prop] }}
+                </el-descriptions-item>
+                <el-descriptions-item
+                    class="expend_form_item"
+                    :label="contactInfoHeader.label"
+                >
+                  {{ props.row[contactInfoHeader.prop] }}
+                </el-descriptions-item>
+
+                <!-- show other engagement -->
+                <el-descriptions-item
+                    v-if="ifShowOther"
+                    v-for="(header, index) in otherHeaders"
+                    :key="index"
+                    :label="header.label"
+                >
+                  {{ props.row[header.prop] }}
+                </el-descriptions-item>
+              </el-descriptions>
+              <div style="margin-left: 20px">
+                <el-checkbox v-model="ifShowOther"> Other Engagement Details </el-checkbox>
+                <el-checkbox v-model="ifShowDynamic"> Show Status by selected Years </el-checkbox>
+              </div>
+              <!-- show status table -->
+              <el-table
+                  :data="[props.row]"
+                  size="small"
+                  class="expend_table"
+                  style="max-width: 100%; overflow-x: auto;"
+                  v-if="ifShowDynamic"
+              >
+                <el-table-column
+                    v-for="header in dynamicHeaders"
+                    :key="header.prop"
+                    :prop="header.prop"
+                    :label="header.label"
+                />
+              </el-table>
+            </el-container>
+
           </template>
         </el-table-column>
         <el-table-column
@@ -598,7 +601,40 @@ const searchRecords = async () => {
       }
     }
   } else if (searchMode.value === 'specific') {
-    console.log(formRecordToUse);
+    formatFormToRecord(formRecordToUse);
+    try {
+      const response = await axios.get(`/api/records/search/specific`, {
+        params: {
+          ...reformatedRecord.value,
+          'year_range': yearRange.value,
+        }
+      });
+      const searchedRecords = response.data.data;
+      masterRecords.value = formatRecords(searchedRecords, yearRange.value);
+    } catch (error) {
+      if (error instanceof AxiosError && error.response && error.response.data) {
+        let errorMessage = [];
+        errorMessage.push(error.response.data.message);
+        if (error.response.data.errors) {
+          for (let field in error.response.data.errors) {
+            if (error.response.data.errors.hasOwnProperty(field)) {
+              error.response.data.errors[field].forEach((errMsg: string) => {
+                errorMessage.push(`${field}: ${errMsg}`);
+              });
+            }
+          }
+        }
+        console.log(errorMessage.join('\n'));
+        ElMessage({
+          message: errorMessage.join('<br>'),
+          type: 'error',
+          dangerouslyUseHTMLString: true
+        });
+      } else {
+        ElMessage.error('An unexpected error occurred while search.');
+      }
+    }
+    handleClose();
   }
 };
 
@@ -651,60 +687,166 @@ const handleDelete = (id: any) => {
 }
 
 const handleConfirm = () => {
+  if (searchMode.value === 'all' && functionMode.value === 'search') {
+    searchRecords();
+    return;
+  } else if (functionMode.value === 'delete') {
+    deleteRecord(idToOperate.value);
+  }
   if (formRef.value) {
     formRef.value.validate(valid => {
       if (valid) {
-
+        switch (functionMode.value) {
+          case 'edit':
+            updateRecord(idToOperate.value);
+            break;
+          case 'add':
+            storeRecord();
+            break;
+          case 'search':
+            searchRecords();
+            break;
+        }
       } else {
-        ElMessage.error("")
+        ElMessage.error("Failed to submit.")
       }
     });
-  }
-  switch (functionMode.value) {
-    case 'delete':
-      deleteRecord(idToOperate.value);
-      break;
-    case 'edit':
-      updateRecord(idToOperate.value);
-      console.log(formRecordToUse);
-      break;
-    case 'add':
-      console.log(formRecordToUse);
-      console.log('Organisation:', formRecordToUse.organisation);
-      storeRecord();
-
-      break;
-    case 'search':
-      searchRecords();
-      break;
   }
 }
 
-const storeRecord = () => {
-  if (formRef.value) {
-    formRef.value.validate((valid) => {
-      if (valid) {
-        handleClose();
-      } else {
-        console.log('表单校验失败');
-      }
-    });
-  } else {
-    console.log('formRef is null');
+const reformatedRecord = ref<any>({});
+const yearRangeReg = /(\d{4}-\d{4})$/;
+
+const extractYearRange = (field: string) => {
+  const match = field.match(yearRangeReg);
+  let yearRange = '';
+  if (match) {
+    yearRange = match[0];
   }
+  return yearRange;
+}
+
+const formatFormToRecord = (record: any = {}) => {
+  reformatedRecord.value = {};
+  const isSpecificSearch = searchMode.value === 'specific' && functionMode.value === 'search';
+  baseHeaders.forEach(header => {
+    if (!isSpecificSearch || record[header.prop] !== '') {
+      reformatedRecord.value[header.prop] = record[header.prop];
+    }
+  });
+  reformatedRecord.value['other_engagement'] = {};
+  otherHeaders.forEach(header => {
+    if (!isSpecificSearch || record[header.prop] !== '') {
+      reformatedRecord.value['other_engagement'][header.prop] = record[header.prop];
+    }
+  });
+  reformatedRecord.value['contact_infos'] = {};
+  if (record[contactInfoHeader.prop] !== null && record[contactInfoHeader.prop].length > 0) {
+    reformatedRecord.value['contact_infos'][contactInfoHeader.prop] = record[contactInfoHeader.prop];
+  }
+  reformatedRecord.value['mentoring_periods'] = [];
+  reformatedRecord.value['industry_years'] = [];
+  reformatedRecord.value['project_years'] = [];
+  mentoringHeaders.value.forEach(header => {
+    if (activatedFields.value[header.prop]) {
+      let academicYear = extractYearRange(header.prop);
+      if (academicYear !== '') {
+        reformatedRecord.value['mentoring_periods'].push({
+          'academic_year': academicYear,
+          'mentoring_status': record[header.prop],
+        });
+      }
+    }
+  });
+  yearInIndustryHeaders.value.forEach(header => {
+    if (activatedFields.value[header.prop]) {
+      let academicYear = extractYearRange(header.prop);
+      if (academicYear !== '') {
+        reformatedRecord.value['industry_years'].push({
+          'academic_year': academicYear,
+          'had_placement_status': record[header.prop],
+        });
+      }
+    }
+  });
+  projectClientHeaders.value.forEach(header => {
+    if (activatedFields.value[header.prop]) {
+      let academicYear = extractYearRange(header.prop);
+      if (academicYear !== '') {
+        reformatedRecord.value['project_years'].push({
+          'academic_year': academicYear,
+          'project_client': record[header.prop],
+        });
+      }
+    }
+  })
+  console.log(reformatedRecord.value);
+}
+
+const storeRecord = async () => {
+  formatFormToRecord(formRecordToUse);
+  try {
+    const response = await axios.post('/api/records/add', reformatedRecord.value);
+    ElMessage.success(response.data.message);
+    await getMasterRecords();
+    console.log(response.data.data);
+  } catch (error) {
+    if (error instanceof AxiosError && error.response && error.response.data) {
+      let errorMessage = [];
+      errorMessage.push(error.response.data.message);
+      if (error.response.data.errors) {
+        for (let field in error.response.data.errors) {
+          if (error.response.data.errors.hasOwnProperty(field)) {
+            error.response.data.errors[field].forEach((errMsg: string) => {
+              errorMessage.push(`${field}: ${errMsg}`);
+            });
+          }
+        }
+      }
+      console.log(errorMessage.join('\n'));
+      ElMessage({
+        message: errorMessage.join('<br>'),
+        type: 'error',
+        dangerouslyUseHTMLString: true
+      });
+    } else {
+      ElMessage.error('An unexpected error occurred while add.');
+    }
+  }
+  handleClose();
 }
 
 const updateRecord = async (id: any) => {
-  if (formRef.value) {
-    await formRef.value.validate((valid, fields) => {
-      if (valid) {
-        console.log('Form submitted successfully!');
-        handleClose();
-      } else {
-        console.log('Form submission error:', fields);
+  formatFormToRecord(formRecordToUse);
+  try {
+    const response = await axios.put(`/api/records/${id}`, reformatedRecord.value);
+    ElMessage.success(response.data.message);
+    await getMasterRecords();
+    console.log(response.data.data);
+  } catch (error) {
+    if (error instanceof AxiosError && error.response && error.response.data) {
+      let errorMessage = [];
+      errorMessage.push(error.response.data.message);
+      if (error.response.data.errors) {
+        for (let field in error.response.data.errors) {
+          if (error.response.data.errors.hasOwnProperty(field)) {
+            error.response.data.errors[field].forEach((errMsg: string) => {
+              errorMessage.push(`${field}: ${errMsg}`);
+            });
+          }
+        }
       }
-    });
+      console.log(errorMessage.join('\n'));
+      ElMessage({
+        message: errorMessage.join('<br>'),
+        type: 'error',
+        dangerouslyUseHTMLString: true
+      });
+    } else {
+      ElMessage.error('An unexpected error occurred while update.');
+    }
   }
+  handleClose();
 }
 
 const deleteRecord = async (id: any) => {
@@ -785,22 +927,6 @@ const deleteRecord = async (id: any) => {
   padding: 0;
   border-radius: 4px;
   width: 100%;
-}
-
-.details_expend {
-  margin-left: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  width: 60vw;
-}
-
-.details_expend .expend_form_item {
-  flex: 1 1 35%;
-}
-.details_expend .expend_form_label{
-  margin-right: 20px;
-  color: #99a9bf;
 }
 
 .expend_table {

@@ -56,13 +56,13 @@ class MasterRecordsController extends Controller
             'job_title' => 'nullable|string|max:255',
             'email' => ['required','email', 'unique:master_records,email'],
             'location' => 'nullable|string|max:255',
-            'uob_alumni' => 'nullable|string|regex:/^(yes|no)$/',
-            'programme_of_study_engaged' => 'string|max:255',
+            'uob_alumni' => ['nullable', 'string', 'regex:/^(yes|no)$/'],
+            'programme_of_study_engaged' => 'nullable|string|max:255',
 
             // mentoring periods
             'mentoring_periods' => 'nullable|array',
             'mentoring_periods.*.academic_year' =>  ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
-            'mentoring_periods.*.status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
+            'mentoring_periods.*.mentoring_status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
 
             // industry years
             'industry_years' => 'nullable|array',
@@ -106,7 +106,7 @@ class MasterRecordsController extends Controller
                 foreach ($validatedData['mentoring_periods'] as $mentoringPeriod) {
                     $masterRecord->mentoringPeriods()->create([
                         'academic_year' => $mentoringPeriod['academic_year'],
-                        'mentoring_status' => $mentoringPeriod['status'],
+                        'mentoring_status' => $mentoringPeriod['mentoring_status'],
                     ]);
                 }
             }
@@ -144,7 +144,7 @@ class MasterRecordsController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json(['error' => 'Failed to create record.'], 500);
+            return response()->json(['error' => 'Failed to create record.'.$e], 500);
         }
     }
 
@@ -179,13 +179,13 @@ class MasterRecordsController extends Controller
             'job_title' => 'nullable|string|max:255',
             'email' => ['required','email', 'unique:master_records,email,' . $id],
             'location' => 'nullable|string|max:255',
-            'uob_alumni' => 'nullable|string|regex:/^(yes|no)$/',
-            'programme_of_study_engaged' => 'string|max:255',
+            'uob_alumni' => ['nullable', 'string', 'regex:/^(yes|no)$/'],
+            'programme_of_study_engaged' => 'nullable|string|max:255',
 
             // mentoring periods
             'mentoring_periods' => 'nullable|array',
             'mentoring_periods.*.academic_year' =>  ['required', 'string', 'max:255','regex:/^\d{4}-\d{4}$/'],
-            'mentoring_periods.*.status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
+            'mentoring_periods.*.mentoring_status' => ['required', 'string', 'max:255','regex:/^(yes|no)$/'],
 
             // industry years
             'industry_years' => 'nullable|array',
@@ -235,7 +235,7 @@ class MasterRecordsController extends Controller
                     if ($existingRecord) {
                         // if exist
                         $existingRecord->update([
-                            'mentoring_status' => $mentoringPeriod['status'],
+                            'mentoring_status' => $mentoringPeriod['mentoring_status'],
                         ]);
                     } else {
                         // creat new records
