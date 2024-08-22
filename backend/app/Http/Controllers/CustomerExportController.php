@@ -16,8 +16,9 @@ class CustomerExportController extends Controller
      *
      * @return Response|BinaryFileResponse
      */
-    public function export(): Response|BinaryFileResponse
+    public function export(Request $request)
     {
-        return Excel::download(new CustomersExport, 'customers.xlsx');
+        $data = $request->input('contacts');
+        return Excel::download(new CustomersExport($data), 'customers.xlsx');
     }
 }
