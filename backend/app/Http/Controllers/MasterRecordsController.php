@@ -79,7 +79,7 @@ class MasterRecordsController extends Controller
             'other_engagement.society_engaged_or_to_engage' => 'nullable|string|max:255',
             'other_engagement.engagement_type' => 'nullable|string|max:255',
             'other_engagement.engagement_happened' => 'nullable|string|max:255',
-            'other_engagement.notes' => 'nullable|text',
+            'other_engagement.notes' => 'nullable|string',
 
             // contacting info
             'contact_infos' => 'nullable|array',
@@ -202,7 +202,7 @@ class MasterRecordsController extends Controller
             'other_engagement.society_engaged_or_to_engage' => 'nullable|string|max:255',
             'other_engagement.engagement_type' => 'nullable|string|max:255',
             'other_engagement.engagement_happened' => 'nullable|string|max:255',
-            'other_engagement.notes' => 'nullable|text',
+            'other_engagement.notes' => 'nullable|string',
 
             // contacting info
             'contact_infos' => 'nullable|array',
