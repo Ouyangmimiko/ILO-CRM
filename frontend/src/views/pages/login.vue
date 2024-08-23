@@ -2,7 +2,7 @@
   <div class="login-bg">
     <div class="login-container">
       <div class="login-header">
-        <img class="logo mr10" src="../../assets/vue.svg" alt="logo" />
+        <img class="logo mr10" src="../../assets/ILO.png" alt="logo" />
         <div class="login-title">ILO CRM</div>
       </div>
       <el-form :model="param" :rules="rules" ref="login" size="large">
@@ -29,16 +29,16 @@
             </template>
           </el-input>
         </el-form-item>
-        <div class="pwd-tips">
-          <el-checkbox
-            class="pwd-checkbox"
-            v-model="checked"
-            label="Remember Password"
-          />
-          <el-link type="primary" @click="$router.push('/reset-pwd')"
-            >Forget the password？</el-link
-          >
-        </div>
+<!--        <div class="pwd-tips">-->
+<!--          <el-checkbox-->
+<!--            class="pwd-checkbox"-->
+<!--            v-model="checked"-->
+<!--            label="Remember Password"-->
+<!--          />-->
+<!--          <el-link type="primary" @click="$router.push('/reset-pwd')"-->
+<!--            >Forget the password？</el-link-->
+<!--          >-->
+<!--        </div>-->
         <el-button
           class="login-btn"
           type="primary"
@@ -49,11 +49,7 @@
         </el-button>
 
         <p class="login-text">
-          Didn't have an account？<el-link
-            type="primary"
-            @click="$router.push('/register')"
-            >Sign up</el-link
-          >
+          Didn't have an account？Please contact the team member.
         </p>
       </el-form>
     </div>

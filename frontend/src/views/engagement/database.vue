@@ -178,6 +178,7 @@
         </el-table-column>
       </el-table>
     </div>
+    <!-- dialog for add/edit/search/delete -->
     <div>
       <el-dialog
           v-model="isDialogVisible"
@@ -273,6 +274,7 @@
         </template>
       </el-dialog>
     </div>
+
   </div>
 </template>
 

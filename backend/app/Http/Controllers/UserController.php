@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
@@ -74,5 +75,20 @@ class UserController extends Controller
         return response()->json([
             'message' => 'User deleted successfully'
         ]);
+    }
+
+    public function changePassword(Request $request) {
+        $validatedData = $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
+
+        $user = $request->user();
+        if (!Hash::check($validatedData['current_password'], $user->password)) {
+            return response()->json(['error' => 'Current password is incorrect'], 400);
+        }
+        $user->password = Hash::make($validatedData['new_password']);
+        $user->save();
+        return response()->json(['message' => 'Password updated successfully']);
     }
 }
