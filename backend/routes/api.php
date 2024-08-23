@@ -3,6 +3,7 @@
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerExportController;
 use App\Http\Controllers\CustomerImportController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\MasterRecordsController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\EnsureAdminRole;
@@ -49,3 +50,4 @@ Route::post('/records/add', [MasterRecordsController::class, 'store']);
 Route::delete('/records/{id}', [MasterRecordsController::class, 'destroy']);
 Route::put('/records/{id}', [MasterRecordsController::class, 'update']);
 Route::get('/records/search/{searchType}', [MasterRecordsController::class, 'search']);
+Route::post('/records/export', [ExportController::class, 'export']);
