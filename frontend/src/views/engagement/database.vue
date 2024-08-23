@@ -76,7 +76,7 @@
 <!--        <el-button>Upload Excel <el-icon style="margin-left: 1em"><UploadFilled /></el-icon></el-button>-->
 <!--      </el-upload>-->
 
-<!--      <el-button @click="exportExcel">Export <el-icon style="margin-left: 1em"><Download /></el-icon></el-button>-->
+      <el-button @click="handleExport">Export <el-icon style="margin-left: 1em"><Download /></el-icon></el-button>
     </div>
     <!-- table -->
     <div class="main_table">
@@ -186,6 +186,16 @@
           class="function-dialog"
           width="50%"
       >
+        <div v-if="functionMode === 'export'">
+          <h3>Export</h3>
+          <div>
+            <el-checkbox v-model="ifExportMentoring" label="Mentoring status"/>
+            <el-checkbox v-model="ifExportIndustry" label="Year in Industry"/>
+            <el-checkbox v-model="ifExportProject" label="Project Client"/>
+            <el-checkbox v-model="ifExportOther" label="Other Engagement"/>
+            <el-checkbox v-model="ifExportContact" label="Contact Information"/>
+          </div>
+        </div>
         <div v-if="functionMode === 'add'">
           <h3>Add a new record</h3>
         </div>
@@ -268,13 +278,12 @@
           </div>
         </el-form>
         <template #footer>
-          <el-button v-if="functionMode !== 'delete'" @click="handleReset" link>Reset</el-button>
+          <el-button v-if="functionMode !== 'delete' && functionMode !== 'export'" @click="handleReset" link>Reset</el-button>
           <el-button @click="handleClose">Cancel</el-button>
           <el-button type="primary" @click="handleConfirm">{{ confirmButtonText }}</el-button>
         </template>
       </el-dialog>
     </div>
-
   </div>
 </template>
 
@@ -647,6 +656,7 @@ const isDialogVisible = ref<boolean>(false);
 const confirmButtonText = ref<string>('');
 
 const handleClose = () => {
+  cancelExport();
   isDialogVisible.value = false;
   ifShowForm.value = false;
   idToOperate.value = '';
@@ -694,6 +704,8 @@ const handleConfirm = () => {
     return;
   } else if (functionMode.value === 'delete') {
     deleteRecord(idToOperate.value);
+  } else if (functionMode.value === 'export') {
+    exportExcel();
   }
   if (formRef.value) {
     formRef.value.validate(valid => {
@@ -860,6 +872,104 @@ const deleteRecord = async (id: any) => {
   } catch (error) {
     ElMessage.error("Error deleting entry");
   }
+};
+
+// Export
+const ifExportMentoring = ref(false);
+const ifExportIndustry = ref(false);
+const ifExportProject = ref(false);
+const ifExportOther = ref(false);
+const ifExportContact = ref(false);
+const exportData = ref<any[]>([]);
+
+const restructureData = () => {
+  return masterRecords.value.map(record => {
+    const newRecord: any = {};
+    baseHeaders.forEach(header => {
+      newRecord[header.label] = record[header.prop] ?? null;
+    });
+    if (ifExportMentoring.value) {
+      mentoringHeaders.value.forEach(header => {
+        newRecord[header.label] = record[header.prop] ?? null;
+      });
+    };
+    if (ifExportIndustry.value) {
+      yearInIndustryHeaders.value.forEach(header => {
+        newRecord[header.label] = record[header.prop] ?? null;
+      })
+    }
+    if (ifExportProject.value) {
+      projectClientHeaders.value.forEach(header => {
+        newRecord[header.label] = record[header.prop] ?? null;
+      })
+    }
+    if (ifExportOther.value) {
+      otherHeaders.forEach(header => {
+        newRecord[header.label] = record[header.prop] ?? null;
+      })
+    }
+    if (ifExportContact.value) {
+      newRecord[contactInfoHeader.label] = record[contactInfoHeader.prop] ?? null;
+    }
+    return newRecord;
+  });
+}
+const handleExport = () => {
+  functionMode.value = 'export';
+  isDialogVisible.value = true;
+  confirmButtonText.value = 'Confirm selection'
+};
+const cancelExport = () => {
+  ifExportMentoring.value = false;
+  ifExportIndustry.value = false;
+  ifExportProject.value = false;
+  ifExportOther.value = false;
+  ifExportContact.value = false;
+
+}
+const exportExcel = async() => {
+  exportData.value = restructureData();
+  console.log(JSON.stringify(exportData, null, 2));
+  try {
+    const response = await axios.post('/api/records/export', { records: exportData.value }, {
+      responseType: 'blob',  // Indicate that the response is a binary file
+    });
+
+    // Create a URL for the file and trigger download
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'engagement_status.xlsx');  // Set the file name
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up
+    link.parentNode?.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    if (error instanceof AxiosError && error.response && error.response.data) {
+      let errorMessage = [];
+      errorMessage.push(error.response.data.message);
+      if (error.response.data.errors) {
+        for (let field in error.response.data.errors) {
+          if (error.response.data.errors.hasOwnProperty(field)) {
+            error.response.data.errors[field].forEach((errMsg: string) => {
+              errorMessage.push(`${field}: ${errMsg}`);
+            });
+          }
+        }
+      }
+      console.log(errorMessage.join('\n'));
+      ElMessage({
+        message: errorMessage.join('<br>'),
+        type: 'error',
+        dangerouslyUseHTMLString: true
+      });
+    } else {
+      ElMessage.error('An unexpected error occurred while update.');
+    }
+  }
+  handleClose();
 };
 
 // Handle file upload
