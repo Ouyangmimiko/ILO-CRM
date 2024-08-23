@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/loginStatus', [AuthController::class, 'checkLoginStatus']);
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::post('/users/changePassword', [UserController::class, 'changePassword']);
 });
 
 // UserController

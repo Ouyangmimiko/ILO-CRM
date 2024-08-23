@@ -46,6 +46,7 @@ const rules = {
       ],
       new_password: [
         { required: true, message: 'Please input a new password', trigger: 'blur' },
+        { min: 6, message: 'Password length should be at least 6 characters', trigger: 'blur' },
       ],
       new_password_confirmation: [
         { required: true, message: 'Please confirm your new password', trigger: 'blur' },
@@ -110,7 +111,33 @@ const updatePass = async () => {
   if (passwordFormRef.value) {
     passwordFormRef.value.validate(async (valid: boolean) => {
       if (valid) {
-
+        try {
+          const response = await axios.post(`/api/users/changePassword`, passwordForm.value);
+          ElMessage.success(response.data.message);
+          handleChangeCancel();
+        } catch (error) {
+          if (error instanceof AxiosError && error.response && error.response.data) {
+            let errorMessage = [];
+            errorMessage.push(error.response.data.message);
+            if (error.response.data.errors) {
+              for (let field in error.response.data.errors) {
+                if (error.response.data.errors.hasOwnProperty(field)) {
+                  error.response.data.errors[field].forEach((errMsg: string) => {
+                    errorMessage.push(`${field}: ${errMsg}`);
+                  });
+                }
+              }
+            }
+            console.log(errorMessage.join('\n'));
+            ElMessage({
+              message: errorMessage.join('<br>'),
+              type: 'error',
+              dangerouslyUseHTMLString: true
+            });
+          } else {
+            ElMessage.error('An unexpected error occurred while update.');
+          }
+        }
       } else {
         ElMessage.error("Failed to update password");
       }
@@ -162,9 +189,9 @@ onMounted(() => {
       <el-button v-if="ifShowForm" @click="handleCancel">Cancel</el-button>
       <el-button v-if="ifShowForm" type="primary" @click="handleConfirm">Confirm</el-button>
     </div>
-    <el-card class="box-card" v-if="ifShowCard">
+    <el-card class="box-card" v-if="ifShowCard" style="width: 50vw; margin-top: 20px">
       <h3>Change Password</h3>
-      <el-form :model="passwordForm" :rules="rules" ref="passwordFormRef" label-width="120px" label-position="top">
+      <el-form :model="passwordForm" :rules="rules" ref="passwordFormRef" label-width="120px" label-position="top" style="width: 25vw; ">
         <el-form-item label="Current Password" prop="current_password">
           <el-input
               type="password"
@@ -178,6 +205,7 @@ onMounted(() => {
               type="password"
               v-model="passwordForm.new_password"
               autocomplete="off"
+              placeholder="Required min length: 6"
           ></el-input>
         </el-form-item>
 
@@ -186,6 +214,7 @@ onMounted(() => {
               type="password"
               v-model="passwordForm.new_password_confirmation"
               autocomplete="off"
+              placeholder="Repeat new password"
           ></el-input>
         </el-form-item>
 
