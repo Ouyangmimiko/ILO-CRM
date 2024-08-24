@@ -65,16 +65,17 @@
     <!-- Function Button -->
     <div class="function-buttons">
       <el-button type="primary" @click="handleAdd" v-if="isAdmin">Add</el-button>
-<!--      <el-upload-->
-<!--        :action="uploadUrl"-->
-<!--        :before-upload="handleBeforeUpload"-->
-<!--        :auto-upload="true"-->
-<!--        :file-list="fileList"-->
-<!--        :on-remove="handleRemove"-->
-<!--        v-if="isAdmin"-->
-<!--      >-->
-<!--        <el-button>Upload Excel <el-icon style="margin-left: 1em"><UploadFilled /></el-icon></el-button>-->
-<!--      </el-upload>-->
+      <el-upload
+        :action="uploadUrl"
+        :http-request="uploadFile"
+        :before-upload="handleBeforeUpload"
+        :auto-upload="true"
+        :file-list="fileList"
+        :on-remove="handleRemove"
+        v-if="isAdmin"
+      >
+        <el-button>Upload Excel <el-icon style="margin-left: 1em"><UploadFilled /></el-icon></el-button>
+      </el-upload>
 
       <el-button @click="handleExport">Export <el-icon style="margin-left: 1em"><Download /></el-icon></el-button>
     </div>
@@ -892,7 +893,7 @@ const restructureData = () => {
       mentoringHeaders.value.forEach(header => {
         newRecord[header.label] = record[header.prop] ?? null;
       });
-    };
+    }
     if (ifExportIndustry.value) {
       yearInIndustryHeaders.value.forEach(header => {
         newRecord[header.label] = record[header.prop] ?? null;
@@ -973,34 +974,43 @@ const exportExcel = async() => {
 };
 
 // Handle file upload
-// const handleBeforeUpload = (file: string | Blob) => {
-//   // Create FormData object
-//   const formData = new FormData();
-//   formData.append("file", file);
-//
-//   // Upload the file
-//   axios
-//     .post(uploadUrl, formData, {
-//       headers: {
-//         "Content-Type": "multipart/form-data",
-//       },
-//     })
-//     .then(() => {
-//       ElMessage.success("File uploaded successfully");
-//       handleQuery(); // Refresh data after successful upload
-//     })
-//     .catch(() => {
-//       ElMessage.error("Error uploading file");
-//     });
-//
-//   // Prevent the default upload behavior
-//   return false;
-// };
+const uploadUrl = '/api/records/import';
+const fileList = ref([]);
+
+const handleBeforeUpload = (file: any) => {
+  const isExcel = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      file.type === 'application/vnd.ms-excel';
+  if (!isExcel) {
+    ElMessage.error('只能上传 Excel 文件');
+  }
+  return isExcel;
+};
+
+const uploadFile = (options: any) => {
+  const { file, onSuccess, onError } = options;
+  const formData = new FormData();
+  formData.append('file', file);
+
+  axios.post(uploadUrl, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+      .then(response => {
+        onSuccess(response.data);
+        ElMessage.success('File upload successfully');
+        getMasterRecords();
+      })
+      .catch(error => {
+        onError(error);
+        ElMessage.error('File upload failed');
+      });
+};
 
 // Handle file remove
-// const handleRemove = () => {
-//   // Handle file removal logic if necessary
-// };
+const handleRemove = () => {
+  // Handle file removal logic if necessary
+};
 </script>
 
 <style scoped>

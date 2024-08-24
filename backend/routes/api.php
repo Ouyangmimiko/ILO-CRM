@@ -38,6 +38,7 @@ Route::middleware(['auth:sanctum', EnsureAdminRole::class])->group(function () {
     Route::post('/records/add', [MasterRecordsController::class, 'store']);
     Route::delete('/records/{id}', [MasterRecordsController::class, 'destroy']);
     Route::put('/records/{id}', [MasterRecordsController::class, 'update']);
+    Route::post('/records/import', [MasterRecordsController::class, 'import']);
 });
 
 // old version of database not in use

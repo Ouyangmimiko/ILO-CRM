@@ -15,9 +15,9 @@ Schedule::call(function () {
 // Clean tokens have expired for over 24h
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote')->hourly();
+//Artisan::command('inspire', function () {
+//    $this->comment(Inspiring::quote());
+//})->purpose('Display an inspiring quote')->hourly();
 
 //Artisan::command('Delete auth_token by setting time', function () {
 //    DB::table('personal_access_tokens')->delete();
