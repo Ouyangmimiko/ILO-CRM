@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Imports\RecordsImport;
 use App\Models\MasterRecord;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,9 +12,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MasterRecordsController extends Controller
 {
+    public function import(Request $request)
+    {
+        try {
+            Excel::import(new RecordsImport, $request->file('file'));
+
+            return response()->json(['message' => 'Records imported successfully.']);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Invalid data in file',
+                'errors' => $e->errors(), // 返回验证错误信息
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Import failed',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
     public function index()
     {
         // Default index with current academic year

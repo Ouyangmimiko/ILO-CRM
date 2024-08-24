@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 class MasterRecord extends Model
 {
@@ -30,6 +31,15 @@ class MasterRecord extends Model
         'uob_alumni',
         'programme_of_study_engaged',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (!$model->id) {
+                $model->id = (string) Str::uuid();
+            }
+        });
+    }
 
     public function mentoringPeriods(): HasMany
     {
