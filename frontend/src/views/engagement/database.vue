@@ -1042,8 +1042,8 @@ const handleRemove = () => {
   margin-bottom: 10px;
   display: flex;
   flex-basis: 100%;
-  gap: 10px; /* 设置按钮之间的间距 */
-  flex-wrap: wrap; /* 确保按钮在窄屏上换行 */
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .main_table {
