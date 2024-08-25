@@ -25,13 +25,13 @@ class MasterRecordsController extends Controller
             return response()->json(['message' => 'Records imported successfully.']);
         } catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Invalid data in file',
+                'message' => 'Missing fields in file',
                 'errors' => $e->errors(), // 返回验证错误信息
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Import failed',
-                'error' => $e->getMessage(),
+                'errors' => $e->getMessage(),
             ], 500);
         }
     }

@@ -967,7 +967,7 @@ const exportExcel = async() => {
         dangerouslyUseHTMLString: true
       });
     } else {
-      ElMessage.error('An unexpected error occurred while update.');
+      ElMessage.error('An unexpected error occurred while export.');
     }
   }
   handleClose();
@@ -987,7 +987,7 @@ const handleBeforeUpload = (file: any) => {
 };
 
 const uploadFile = (options: any) => {
-  const { file, onSuccess, onError } = options;
+  const { file, onSuccess } = options;
   const formData = new FormData();
   formData.append('file', file);
 
@@ -1002,8 +1002,11 @@ const uploadFile = (options: any) => {
         getMasterRecords();
       })
       .catch(error => {
-        onError(error);
-        ElMessage.error('File upload failed');
+        if (error.response && error.response.data && error.response.data.errors) {
+          ElMessage.error(error.response.data.message + ' ' + error.response.data.errors);
+        } else {
+          ElMessage.error('An unexpected error occurred while upload.');
+        }
       });
 };
 
