@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\MasterRecord;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -41,11 +42,12 @@ class RecordsImport implements ToModel, WithHeadingRow
         );
 
         foreach ($row as $column => $value) {
-            if (str_contains($column, 'Mentoring') && !empty($value)) {
+            Log::info('Processing Column:', ['column' => $column, 'value' => $value]);
+            if (str_contains($column, 'mentoring') && !empty($value)) {
                 $this->handleMentoringPeriod($masterRecord, $column, $value);
-            } elseif (str_contains($column, 'Industry') && !empty($value)) {
+            } elseif (str_contains($column, 'industry') && !empty($value)) {
                 $this->handleIndustryYear($masterRecord, $column, $value);
-            } elseif (str_contains($column, 'Project') && !empty($value)) {
+            } elseif (str_contains($column, 'project') && !empty($value)) {
                 $this->handleProjectYear($masterRecord, $column, $value);
             }
         }
@@ -66,7 +68,7 @@ class RecordsImport implements ToModel, WithHeadingRow
     protected function handleIndustryYear($masterRecord, $column, $value): void
     {
         $academicYear = $this->extractAcademicYear($column);
-        $masterRecord->mentoringPeriods()->updateOrCreate(
+        $masterRecord->industryYears()->updateOrCreate(
             ['academic_year' => $academicYear],
             ['had_placement_status' => $value]
         );
@@ -75,7 +77,7 @@ class RecordsImport implements ToModel, WithHeadingRow
     protected function handleProjectYear($masterRecord, $column, $value): void
     {
         $academicYear = $this->extractAcademicYear($column);
-        $masterRecord->mentoringPeriods()->updateOrCreate(
+        $masterRecord->projectYears()->updateOrCreate(
             ['academic_year' => $academicYear],
             ['project_client' => $value]
         );
@@ -108,6 +110,7 @@ class RecordsImport implements ToModel, WithHeadingRow
 
     protected function extractAcademicYear($column): ?string
     {
+        $column = str_replace('_', '-', $column);
         preg_match('/\d{4}-\d{4}/', $column, $matches);
         return $matches[0] ?? null;
     }
