@@ -1,0 +1,57 @@
+@startuml
+
+!define RECTANGLE class
+!define ABSTRACT class
+
+RECTANGLE AuthController {
+    +register(Request $request): Response
+    +login(Request $request): Response
+    +logout(Request $request): Response
+    +checkLoginStatus(Request $request): Response
+}
+
+RECTANGLE UserController {
+    +index(): Response
+    +show($id): Response
+    +store(Request $request): Response
+    +update(Request $request, $id): Response
+    +destroy($id): Response
+}
+
+RECTANGLE EnsureAdminRole {
+    +handle(Request $request, Closure $next): Response
+}
+
+RECTANGLE User {
+    -id
+    -name
+    -email
+    -password
+    +userRoles(): HasOne
+    +isAdmin(): bool
+}
+
+RECTANGLE UserRole {
+    -id
+    -is_admin
+    +users(): BelongsTo
+}
+
+RECTANGLE UserFactory {
+    -static ?string $password
+    +definition(): array
+    +unverified(): static
+}
+
+RECTANGLE UserSeeder {
+    +run(): void
+}
+
+AuthController ..> User : uses
+UserController ..> AuthController : uses
+User ..> UserRole : hasOne
+UserRole ..> User : belongsTo
+UserSeeder ..> User : creates
+UserFactory ..> User : generates
+
+@enduml

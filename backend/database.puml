@@ -1,0 +1,87 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class MasterRecord {
+    +UUID id
+    +string organisation
+    +string first_name
+    +string surname
+    +string job_title
+    +string email
+    +string location
+    +enum uob_alumni {yes, no}
+    +enum programme_of_study_engaged {MECH, Aerospace Engineering, CS}
+    +timestamp created_at
+    +timestamp updated_at
+}
+
+class IndustryYear {
+    +UUID id
+    +UUID master_record_id
+    +string academic_year
+    +enum had_placement_status {yes, no}
+    +timestamp created_at
+    +timestamp updated_at
+}
+
+class MentoringPeriod {
+    +UUID id
+    +UUID master_record_id
+    +string academic_year
+    +enum mentoring_status {yes, no}
+    +timestamp created_at
+    +timestamp updated_at
+}
+
+class ProjectYear {
+    +UUID id
+    +UUID master_record_id
+    +string academic_year
+    +enum project_status {yes, no}
+    +timestamp created_at
+    +timestamp updated_at
+}
+
+
+class OtherEngagement {
+    +UUID id
+    +UUID master_record_id
+    +string society_engaged_or_to_engage
+    +enum engagement_type {Talks, Site Visit, Design Challenge}
+    +enum engagement_happened {Sponsored, No, Internship}
+    +string notes
+    +timestamp created_at
+    +timestamp updated_at
+}
+
+MasterRecord "1" --> "0..*" IndustryYear : has
+MasterRecord "1" --> "0..*" MentoringPeriod : has
+MasterRecord "1" --> "0..*" ProjectYear : has
+MasterRecord "1" --> "0..*" OtherEngagement : has
+
+class IndustryYearFactory {
+    +array definition()
+    +IndustryYearFactory configure()
+}
+class MentoringPeriodFactory {
+    +array definition()
+    +MentoringPeriodFactory configure()
+}
+class ProjectYearPeriodFactory {
+    +array definition()
+    +ProjectYearPeriodFactory configure()
+}
+class MasterRecordFactory {
+    +array definition()
+}
+class OtherEngagementFactory {
+    +array definition()
+}
+
+IndustryYearFactory --> IndustryYear : creates
+MentoringPeriodFactory --> MentoringPeriod : creates
+ProjectYearPeriodFactory --> ProjectYear : creates
+MasterRecordFactory --> MasterRecord : creates
+OtherEngagementFactory --> OtherEngagement : creates
+
+@enduml
