@@ -1,0 +1,101 @@
+@startuml
+
+namespace App\Models {
+    class Customer {
+        +string $id
+        +string $organisation
+        +string $organisation_sector
+        +string $first_name
+        +string $surname
+        +string $job_title
+        +string $email
+        +string $location
+        +string $uob_alumni
+        +string $programme_of_study_engaged
+        +string $info_related_to_contacting_the_partner
+        --
+        +static generateCustomerId(): string
+        +static boot(): void
+    }
+
+    class MasterRecord {}
+    class MentoringPeriod {}
+    class IndustryYear {}
+    class OtherEngagement {}
+    class User {}
+}
+
+namespace App\Imports {
+    interface ToCollection {
+        +collection(Collection $collection)
+    }
+    interface WithHeadingRow {}
+    interface WithValidation {
+        +rules(): array
+    }
+    class CustomersImport implements ToCollection, WithHeadingRow, WithValidation {
+        +collection(Collection $collection)
+        +rules(): array
+    }
+
+    class CustomersExport {
+        +__construct(array $data)
+        +collection(): Collection
+    }
+}
+
+namespace App\Http\Controllers {
+    class Controller {}
+
+    class CustomerImportController extends Controller {
+        +import(Request $request): JsonResponse
+    }
+
+    class CustomerExportController extends Controller {
+        +export(Request $request): Response
+    }
+
+    class CustomerController extends Controller {
+        +store(Request $request): JsonResponse
+        +destroy($id): JsonResponse
+        +update(Request $request, $id): JsonResponse
+        +search(Request $request): JsonResponse
+        +show($id): JsonResponse
+    }
+}
+
+namespace Maatwebsite.Excel {
+    class ExcelFacade {
+        +static import($import, string $filePath)
+        +static download($export, string $fileName): BinaryFileResponse
+    }
+}
+
+namespace Database\Factories {
+    class CustomerFactory {
+        +definition(): array
+    }
+}
+
+namespace Database\Seeders {
+    class DatabaseSeeder {
+        +run(): void
+    }
+}
+
+CustomerImportController --> CustomersImport
+CustomerExportController --> CustomersExport
+CustomersImport --> Customer
+CustomersExport --> Collection
+CustomerFactory --> Customer
+DatabaseSeeder --> CustomerFactory
+ExcelFacade --> CustomersImport
+ExcelFacade --> CustomersExport
+DatabaseSeeder --> MasterRecord
+DatabaseSeeder --> MentoringPeriod
+DatabaseSeeder --> IndustryYear
+DatabaseSeeder --> OtherEngagement
+DatabaseSeeder --> User
+CustomerController --> Customer
+
+@enduml
