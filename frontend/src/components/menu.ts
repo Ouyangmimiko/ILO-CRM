@@ -26,7 +26,7 @@ export const menuData: Menus[] = [
         id: "12",
         pid: "1",
         index: "/mentor-management",
-        title: "Mentoring Status",
+        title: "Mentoring",
         permissions: ["user", "admin", "master"],
       },
       {
@@ -40,7 +40,7 @@ export const menuData: Menus[] = [
         id: "14",
         pid: "1",
         index: "/projects-management",
-        title: "Projects Client Status",
+        title: "Industry Projects",
         permissions: ["user", "admin", "master"],
       },
     ],
