@@ -262,7 +262,7 @@ class MasterRecordsController extends Controller
                         // creat new records
                         $masterRecord->mentoringPeriods()->create([
                             'academic_year' => $mentoringPeriod['academic_year'],
-                            'mentoring_status' => $mentoringPeriod['status'],
+                            'mentoring_status' => $mentoringPeriod['mentoring_status'],
                         ]);
                     }
                 }

@@ -18,8 +18,6 @@ export const usePermissStore = defineStore("permiss", {
         "user-center",
       ],
       admin: [
-        "system-user",
-        "system-role",
         "database-management",
         "mentor-management",
         "YiI-management",
