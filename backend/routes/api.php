@@ -21,6 +21,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::post('/users/changePassword', [UserController::class, 'changePassword']);
+    // New table structure api for all user
+    Route::get('/records', [MasterRecordsController::class, 'index']);
+    Route::get('/records_by_year_range', [MasterRecordsController::class, 'indexByYearRange']);
+    Route::get('/records/search/{searchType}', [MasterRecordsController::class, 'search']);
+    Route::post('/records/export', [ExportController::class, 'export']);
 });
 
 // UserController
@@ -51,7 +56,7 @@ Route::middleware(['auth:sanctum', EnsureAdminRole::class])->group(function () {
 //Route::get('/export', [CustomerExportController::class, 'export']);
 
 // New table structure api for all user
-Route::get('/records', [MasterRecordsController::class, 'index']);
-Route::get('/records_by_year_range', [MasterRecordsController::class, 'indexByYearRange']);
-Route::get('/records/search/{searchType}', [MasterRecordsController::class, 'search']);
-Route::post('/records/export', [ExportController::class, 'export']);
+//Route::get('/records', [MasterRecordsController::class, 'index']);
+//Route::get('/records_by_year_range', [MasterRecordsController::class, 'indexByYearRange']);
+//Route::get('/records/search/{searchType}', [MasterRecordsController::class, 'search']);
+//Route::post('/records/export', [ExportController::class, 'export']);

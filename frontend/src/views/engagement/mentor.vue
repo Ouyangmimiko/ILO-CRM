@@ -478,6 +478,10 @@ const getMasterRecords = async () => {
     const records = response.data.data;
     yearRange.value = response.data.year_range;
     masterRecords.value = formatRecords(records, yearRange.value);
+    masterRecords.value = masterRecords.value.filter(record => {
+      // filter data with empty value of required field
+      return yearRange.value.some(year => record[`mentoring_${year}`]);
+    });
     tableHeaders.value = getTableHeaders(yearRange.value);
     // Generate complete form headers
     formHeaders.value = [...tableHeaders.value, ...otherHeaders, contactInfoHeader];

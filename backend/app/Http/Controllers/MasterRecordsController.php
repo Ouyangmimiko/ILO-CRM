@@ -378,7 +378,14 @@ class MasterRecordsController extends Controller
                     continue;
                 }
 
-                if ($key !== 'mentoring_periods' && $key !== 'industry_years' && $key !== 'year_range') {
+                if (
+                    $key !== 'mentoring_periods'
+                    && $key !== 'industry_years'
+                    && $key !== 'project_years'
+                    && $key !== 'other_engagement'
+                    && $key !== 'contact_infos'
+                    && $key !== 'year_range'
+                ) {
                     $query->where($key, $value);
                 }
             }
@@ -399,7 +406,7 @@ class MasterRecordsController extends Controller
                 $query->whereHas('industryYears', function ($q) use ($requestData) {
                     foreach ($requestData['industry_years'] as $filter) {
                         foreach ($filter as $column => $value) {
-                            $q->where($column, $value);
+                            $q->where($column, 'LIKE', "%{$value}%");
                         }
                     }
                 });
@@ -410,7 +417,7 @@ class MasterRecordsController extends Controller
                 $query->whereHas('projectYears', function ($q) use ($requestData) {
                     foreach ($requestData['project_years'] as $filter) {
                         foreach ($filter as $column => $value) {
-                            $q->where($column, $value);
+                            $q->where($column, 'LIKE', "%{$value}%");
                         }
                     }
                 });
@@ -420,7 +427,7 @@ class MasterRecordsController extends Controller
             if (isset($requestData['other_engagement'])) {
                 $query->whereHas('otherEngagement', function ($q) use ($requestData) {
                     foreach ($requestData['other_engagement'] as $column => $value) {
-                        $q->where($column, $value);
+                        $q->where($column, 'LIKE', "%{$value}%");
                     }
                 });
             }
@@ -429,7 +436,7 @@ class MasterRecordsController extends Controller
             if (isset($requestData['contact_infos'])) {
                 $query->whereHas('contactInfos', function ($q) use ($requestData) {
                     foreach ($requestData['contact_infos'] as $column => $value) {
-                        $q->where($column, $value);
+                        $q->where($column, 'LIKE', "%{$value}%");
                     }
                 });
             }
