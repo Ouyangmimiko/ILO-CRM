@@ -14,7 +14,7 @@ ILO Partner Database System is a database management system designed for the Ind
 - Provides data tables for viewing and editing, including academic year information (e.g., Mentoring, Year in Industry).
 - RESTful API endpoints for frontend-backend interaction.
 
-## Setup Instructions (Not complicated, may refer to GPT with 'How to run Laravel and vue 3 project)
+## Setup Instructions (Not complete, may refer to GPT with 'How to run Laravel and vue 3 project)
 1. Clone the Repository
 ```bash
 git clone <repo-url>
